@@ -198,6 +198,11 @@
       dot('place-bomnl', "blue");
       dot('place-forhl', "orange");
       dot('place-ogmnl', "orange");
+      dot('place-lech', "green");
+      dot('place-lake', "green");
+      dot('place-clmnl', "green");
+      dot('place-river', "green");
+      dot('place-hsmnl', "green");
       if (trips) {
         renderTrainsAtTime(lastTime, true);
       }

@@ -273,6 +273,11 @@ VIZ.requiresData([
     dot('place-bomnl', "blue");
     dot('place-forhl', "orange");
     dot('place-ogmnl', "orange");
+    dot('place-lech', "green");
+    dot('place-lake', "green");
+    dot('place-clmnl', "green");
+    dot('place-river', "green");
+    dot('place-hsmnl', "green");
   }
 
   // Render train dots onto the map glyph at a particular point in time
