@@ -1,0 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato&display=swap');
+
+body {
+  margin: 0;
+  display: grid;
+  grid-gap: 4rem;
+  box-sizing: border-box;
+  padding: 4rem;
+  background: #f8f8f8;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  max-width: 1500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@import 'cards';
+@import 'map';
+@import 'marey';
+@import 'hero';
+@import 'timetable';

@@ -1,0 +1,42 @@
+@import 'colors';
+
+.map {
+  .map-node {
+    fill: #fff;
+  }
+
+  .map-connect {
+    stroke-linecap: round;
+  }
+
+
+  .map-connect {
+    &.green,
+    &.green-b,
+    &.green-c,
+    &.green-d,
+    &.green-e,
+    &.green-f {
+      stroke: rgba($green-line, 1);
+    }
+    &.red {
+      stroke: rgba($red-line, 1);
+    }
+    &.orange {
+      stroke: rgba($orange-line, 1);
+    }
+    &.blue {
+      stroke: rgba($blue-line, 1);
+    }
+  }
+
+  .map-train {
+    fill: #000;
+  }
+
+  .map-end {
+    fill: #fff;
+    stroke: #000;
+    stroke-width: 0.08;
+  }
+}

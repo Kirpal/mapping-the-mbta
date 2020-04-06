@@ -1,0 +1,109 @@
+@import 'colors';
+
+#timetables {
+  grid-column: 1 / -1;
+  font-family: Lato, sans-serif;
+  text-align: center;
+
+  p {
+    width: 50%;
+    display: inline-block;
+    text-align: left;
+    margin-bottom: 3rem;
+  }
+
+  #line-selector {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: inline-flex;
+    box-sizing: border-box;
+    border: 1px solid #bbb;
+    border-radius: 0.5em;
+
+    li {
+      display: inline-block;
+
+      .line-select-label {
+        cursor: pointer;
+        padding: 1em 2em;
+        margin: 1em;
+        border-radius: 0.2em;
+        display: inline-block;
+        transition: 0.1s all;
+        font-weight: 600;
+  
+        &.green {
+          color: $green-line;
+        }
+  
+        &.orange {
+          color: $orange-line;
+        }
+  
+        &.red {
+          color: $red-line;
+        }
+  
+        &.blue {
+          color: $blue-line;
+        }
+      }
+
+      .line-select:checked + .line-select-label {
+  
+        &.green {
+          color: $green-line;
+          background: rgba($green-line, 0.3);
+        }
+  
+        &.orange {
+          color: $orange-line;
+          background: rgba($orange-line, 0.3);
+        }
+  
+        &.red {
+          color: $red-line;
+          background: rgba($red-line, 0.3);
+        }
+  
+        &.blue {
+          color: $blue-line;
+          background: rgba($blue-line, 0.3);
+        }
+
+      }
+
+      .line-select {
+        display: none;
+      }
+    }
+  }
+
+  #timetable-holder {
+    display: grid;
+    grid-gap: 3rem;
+    box-sizing: border-box;
+    padding: 3rem;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  }
+}
+
+.station-timetable {
+  //grid-column: auto / span 2;
+  color: #fff;
+
+  .station-header {
+    margin-top: 0;
+  }
+
+  table {
+    width: 100%;
+
+    td {
+      padding: 0.4rem 0;
+      color: #fff;
+      font-weight: 600;
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "mapping-the-mbta",
+  "version": "1.0.0",
+  "private": true,
+  "repository": "git@github.com:Kirpal/mapping-the-mbta.git",
+  "author": "Kirpal Demian and Vasu Zalawadia",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.0",
+    "autoprefixer": "^9.7.5",
+    "babel-loader": "^8.1.0",
+    "chart.js": "^2.9.3",
+    "chartist": "^0.11.4",
+    "chartist-plugin-tooltips-updated": "^0.1.2",
+    "css-loader": "^3.4.2",
+    "moment": "^2.24.0",
+    "node-sass": "^4.13.1",
+    "postcss-loader": "^3.0.0",
+    "sass-loader": "^8.0.2",
+    "style-loader": "^1.1.3",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
+  }
+}

@@ -1,0 +1,5 @@
+node_modules
+ApiKey.cs
+.vscode
+.pytest_cache
+old

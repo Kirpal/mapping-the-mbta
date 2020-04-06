@@ -16,8 +16,6 @@ spider = json.load(open("data/old-spider.json"))
 green_station_network = json.load(open("data/green-line-station-network.json"))
 green_spider = json.load(open("data/green-line-spider.json"))
 
-minX = 0
-
 # Add each node and spider location that doesn't already exist
 for station in green_station_network["nodes"]:
     if station["id"] not in [node["id"] for node in station_network["nodes"]]:
@@ -29,7 +27,38 @@ for station in green_station_network["nodes"]:
         newX = green_spider[station["id"]][0] - 12.242640689000002
         newY = green_spider[station["id"]][1] + 1.050252532
         spider[station["id"]] = [newX, newY]
-        minX = min(minX, newX)
+
+# Add assembly stop (2014)
+station_network["nodes"].append({"id": "place-astao", "name": "Assembly Station"})
+spider["place-astao"] = [8.485281374, 2]
+spider["place-welln"] = [8.485281374, 1]
+spider["place-mlmnl"] = [8.485281374, 0]
+spider["place-ogmnl"] = [8.485281374, -1]
+assembly_target = ""
+assembly_source = ""
+assembly_index = nodeIndex(station_network["nodes"], "place-astao")
+
+newlinks = []
+
+for link in station_network["links"]:
+    if link["source"] == nodeIndex(station_network["nodes"], "place-sull"):
+        newlinks.append({
+            "source": link["source"],
+            "target": assembly_index,
+            "line": link["line"],
+            "color": link["color"]
+        })
+        newlinks.append({
+            "source": assembly_index,
+            "target": link["target"],
+            "line": link["line"],
+            "color": link["color"]
+        })
+    else:
+        newlinks.append(link)
+
+station_network["links"] = newlinks
+
 
 # Add each green line link with the new list of nodes
 for link in green_station_network["links"]:
@@ -48,6 +77,7 @@ nodes_to_shift = [
     "place-north",
     "place-ccmnl",
     "place-sull",
+    "place-astao",
     "place-welln",
     "place-mlmnl",
     "place-ogmnl"
@@ -59,39 +89,16 @@ for nodeId in nodes_to_shift:
     spider[nodeId][1] -= 0.707106781
 
 # Make sure all nodes are on the chart (x and y greater than 0)
+minX = 0
+minY = 0
+for pos in spider.values():
+    minX = min(minX, pos[0])
+    minY = min(minY, pos[1])
+
 for nodeId, pos in spider.items():
     pos[0] += abs(minX)
-    pos[1] += 0.707106781
+    pos[1] += abs(minY)
 
 # Save the spider and network data
 json.dump(spider, open("data/spider.json", "w"))
 json.dump(station_network, open("data/station-network.json", "w"))
-
-
-# Load the marey trip data
-marey_trips = json.load(open("data/old-marey-trips.json"))
-green_marey_trips = json.load(open("data/green-line-marey-trips.json"))
-
-# Add all green line trips
-for trip in green_marey_trips:
-    marey_trips.append(trip)
-
-# Save trip data
-json.dump(marey_trips, open("data/marey-trips.json", "w"))
-
-# Load the header data
-marey_header = json.load(open("data/old-marey-header.json"))
-green_marey_header = json.load(open("data/green-line-marey-header.json"))
-maxX = 0
-
-# Find the max x coordinate on the old chart
-for coord in marey_header.values():
-    maxX = max(coord[0], maxX)
-
-# Add the green line stations to the right of the existing chart
-maxX += 2
-for name, coord in green_marey_header.items():
-    marey_header[name] = [coord[0] + maxX, coord[1]]
-
-# Save header data
-json.dump(marey_header, open("data/marey-header.json", "w"))

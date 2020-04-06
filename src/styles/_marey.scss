@@ -1,0 +1,73 @@
+@import "colors";
+
+
+.marey {
+  background: #fff;
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  padding: 4rem;
+
+  #marey-map {
+    width: 50%;
+  }
+
+  #marey-text {
+    width: 45%;
+  }
+
+  #marey-main {
+    position: relative;
+    width: 100%;
+    height: 80vh;
+    overflow-x: scroll;
+    font: 0.8rem Lato, sans-serif;
+
+    .marey-tooltip {
+      display: none;
+      border-left: 1px solid #000;
+      position: absolute;
+
+      p {
+        background: rgba(255, 255, 255, 0.6);
+        font-weight: bold;
+        padding: 4px;
+        margin: 0;
+      }
+    }
+
+    .ct-series {
+      fill: none;
+
+      &.blue {
+        stroke: $blue-line;
+      }
+      &.red {
+        stroke: $red-line;
+      }
+      &.orange {
+        stroke: $orange-line;
+      }
+      &.green,
+      &.green-b,
+      &.green-c,
+      &.green-d,
+      &.green-e {
+        stroke: $green-line;
+      }
+    }
+
+    .ct-line {
+      stroke-width: 1px;
+    }
+
+    .ct-grid {
+      stroke: #ddd;
+      stroke-width: 1px;
+    }
+
+    .ct-label.ct-vertical {
+      font-size: 0.6em;
+    }
+  }
+}
