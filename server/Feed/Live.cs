@@ -11,20 +11,20 @@ namespace MappingTheMBTA.Data
     {
         private static string[] Routes = { "Blue", "Red", "Orange", "Green-B", "Green-C", "Green-D", "Green-E" };
         private static Dictionary<string, string> Places = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(@"stations.json"));
-        private static List<Vehicle> Vehicles;
-        private static List<Stop> Stops;
+        private static LiveData Trips;
 
         // gets the most recently updated data available
-        public static IEnumerable<Vehicle> GetUpdated()
+        public static LiveData GetUpdated()
         {
-            return Vehicles;
+            return Trips;
         }
 
         // fetches the most recent data
         // updates predictions & vehicle lists
         public static void UpdateData()
         {
-            List<Vehicle> processed = new List<Vehicle>();
+            List<Trip> processed = new List<Trip>();
+
             foreach (string route in Routes)
             {
                 string jsonPreds = "";
@@ -36,32 +36,31 @@ namespace MappingTheMBTA.Data
                 processed.AddRange(ProcessData(jsonPreds, jsonVehicles));
             }
 
-            Vehicles = processed;
-            Stops = null; // FILL IN LATER
+            Trips = new LiveData() { Trips = processed };
         }
 
         // processes raw json into the list format that needs to be returned to the client
-        private static List<Vehicle> ProcessData(string predJson, string vehicleJson)
+        private static List<Trip> ProcessData(string predJson, string vehicleJson)
         {
-            List<Vehicle> result = new List<Vehicle>();
+            List<Trip> result = new List<Trip>();
             var dataPreds = JsonConvert.DeserializeObject<dynamic>(predJson).data;
             var dataVehicles = JsonConvert.DeserializeObject<dynamic>(vehicleJson).data;
             
             foreach (var vehicle in dataVehicles)
             {
-                result.Add(new Vehicle()
+                result.Add(new Trip()
                 {
                     Stations = new List<Prediction>(),
                     Line = vehicle.relationships.route.data.id,
-                    ID = vehicle.id
+                    VehicleID = vehicle.id
                 });
             }
             foreach (var prediction in dataPreds)
             {
                 string vehicleID = prediction.relationships.vehicle.data.id;
-                if (result.Any(x => x.ID == vehicleID))
+                if (result.Any(x => x.VehicleID == vehicleID))
                 {
-                    Vehicle toAdd = result.Single(x => x.ID == vehicleID);
+                    Trip toAdd = result.Single(x => x.VehicleID == vehicleID);
                     string GTFS = prediction.relationships.stop.data.id;
                     Prediction predToAdd = new Prediction()
                     {
@@ -71,6 +70,7 @@ namespace MappingTheMBTA.Data
                             PlaceID = ResolveGTFS(GTFS)
                         },
                     };
+
                     if (prediction.attributes.arrival_time != null)
                         predToAdd.ArrivalEst = ParseTime(prediction.attributes.arrival_time);
                     if (prediction.attributes.departure_time != null)

@@ -19,13 +19,13 @@ namespace MappingTheMBTA.Controllers
         }
 
         [HttpGet("live")]
-        public IEnumerable<Vehicle> GetLiveVehicles()
+        public LiveData GetLiveVehicles()
         {
             return Data.Live.GetUpdated();
         }
 
         [HttpGet("scheduled")]
-        public IEnumerable<Vehicle> GetSchedule()
+        public IEnumerable<Trip> GetSchedule()
         {
             return null;
         }
