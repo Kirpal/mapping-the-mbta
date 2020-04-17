@@ -2,12 +2,13 @@
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
 WORKDIR /app
+EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
-COPY ["MappingTheMBTA.csproj", ""]
+COPY ["server/MappingTheMBTA.csproj", ""]
 RUN dotnet restore "./MappingTheMBTA.csproj"
-COPY . .
+COPY server .
 WORKDIR "/src/."
 RUN dotnet build "MappingTheMBTA.csproj" -c Release -o /app/build
 
