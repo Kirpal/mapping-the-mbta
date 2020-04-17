@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using FluentScheduler;
 
 namespace MappingTheMBTA
 {
@@ -13,6 +8,7 @@ namespace MappingTheMBTA
     {
         public static void Main(string[] args)
         {
+            JobManager.Initialize(new Scheduler());
             CreateHostBuilder(args).Build().Run();
         }
 
