@@ -45,14 +45,16 @@ namespace MappingTheMBTA.Data
             List<Trip> result = new List<Trip>();
             var dataPreds = JsonConvert.DeserializeObject<dynamic>(predJson).data;
             var dataVehicles = JsonConvert.DeserializeObject<dynamic>(vehicleJson).data;
-            
+
             foreach (var vehicle in dataVehicles)
             {
                 result.Add(new Trip()
                 {
                     Stations = new List<Prediction>(),
                     Line = vehicle.relationships.route.data.id,
-                    VehicleID = vehicle.id
+                    VehicleID = vehicle.id,
+                    StartTime = 0,
+                    EndTime = 0
                 });
             }
             foreach (var prediction in dataPreds)
@@ -77,6 +79,22 @@ namespace MappingTheMBTA.Data
                         predToAdd.DepartureEst = ParseTime(prediction.attributes.departure_time);
 
                     toAdd.Stations.Add(predToAdd);
+                }
+            }
+
+            foreach (Trip trip in result)
+            {
+                List<ulong> times = new List<ulong>();
+                foreach (Prediction pred in trip.Stations)
+                {
+                    times.Add(pred.ArrivalEst);
+                    times.Add(pred.DepartureEst);
+                }
+                var nonzero = times.Where(x => x != 0);
+                if (nonzero.Count() > 0)
+                {
+                    trip.StartTime = nonzero.Min(x => x);
+                    trip.EndTime = nonzero.Max(x => x);
                 }
             }
 
