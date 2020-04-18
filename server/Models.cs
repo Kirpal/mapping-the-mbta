@@ -3,12 +3,20 @@ using System.Collections.Generic;
 
 namespace MappingTheMBTA
 {
-    public class Vehicle
+    public class LiveData
+    {
+        public List<Trip> Trips { get; set; }
+    }
+
+    public class Trip
     {
         public List<Prediction> Stations { get; set; }
 
         public string Line { get; set; }
-        public string ID { get; set; }
+        public string VehicleID { get; set; }
+
+        public ulong StartTime { get; set; }
+        public ulong EndTime { get; set; }
     }
 
     public class Prediction
