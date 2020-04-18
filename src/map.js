@@ -1,59 +1,71 @@
 import Chartist from 'chartist';
-import stationNetwork from '../data/station-network.json';
-import spider from '../data/spider.json';
-import mareyTrips from '../data/marey-trips.json';
+import {spider, stationNetwork} from './data';
 
-const getCurrentTrains = (timestamp) => {
+const getCurrentTrains = (timestamp, mareyTrips) => {
   return Object.fromEntries(mareyTrips
-    .filter((trip) => trip.begin < timestamp && trip.end > timestamp)
-    .map(({stops, line, trip}) => ({
-      line: line,
-      trip: trip,
-      stops: stops.sort((a, b) => a.time - b.time)
-    }))
-    .map(({stops, line, trip}) => {
-      let from = stops.reduce((prev, curr) => {
-        if (curr.time > prev.time && curr.time < timestamp) {
-          return curr;
-        } else {
-          return prev;
-        }
-      });
-      from.coord = spider[from.stop];
+    .filter((trip) => trip.stations.length > 1)
+    .filter((trip) => trip.startTime < timestamp && trip.endTime > timestamp)
+    .map(({stations, line, vehicleID}) => {
+      let currentStations = stations.filter(({departureEst, arrivalEst}) => departureEst > timestamp && arrivalEst < timestamp && arrivalEst > 0);
+      let to, from;
 
-      let to = stops.reduce((prev, curr) => {
-        if (curr.time < prev.time && curr.time > timestamp) {
-          return curr;
-        } else {
-          return prev;
-        }
-      }, stops[stops.length - 1]);
-      to.coord = spider[to.stop];
+      if (currentStations.length > 0) {
+        to = currentStations[0];
+        from = currentStations[0];
+      } else {
+        from = stations
+        .sort((a, b) => a.departureEst - b.departureEst)
+        .reduce((prev, curr) => {
+          if (curr.departureEst > prev.departureEst && curr.departureEst < timestamp) {
+            return curr;
+          } else {
+            return prev;
+          }
+        });
+
+        to = stations
+        .sort((a, b) => a.arrivalEst - b.arrivalEst)
+        .reduce((prev, curr) => {
+          if (curr.arrivalEst < prev.arrivalEst && curr.arrivalEst > timestamp) {
+            return curr;
+          } else {
+            return prev;
+          }
+        }, stations[stations.length - 1]);
+      }
+
+      to.coord = spider[to.station.placeID];
+      from.coord = spider[from.station.placeID];
 
       return {
         to,
         from,
         line,
-        trip
+        vehicleID
       };
     })
-    .map(({to, from, line, trip}) => {
-      let ratio = (timestamp - from.time) / (to.time - from.time);
-
+    .map(({to, from, line, vehicleID}) => {
+      let ratio = (timestamp - from.departureEst) / (to.arrivalEst - from.departureEst);
+      
+      let x = from.coord[0];
+      let y = from.coord[1];
+      if (from.coord[0] != to.coord[0] || from.coord[1] != to.coord[1]) {
+        x = from.coord[0] + ratio * (to.coord[0] - from.coord[0]);
+        y = from.coord[1] + ratio * (to.coord[1] - from.coord[1]);
+      }
       return [
-        trip,
+        vehicleID,
         {
-          x: from.coord[0] + ratio * (to.coord[0] - from.coord[0]),
-          y: from.coord[1] + ratio * (to.coord[1] - from.coord[1]),
+          x: x,
+          y: y,
           line: line,
         }
       ];
     }));
 }
 
-const drawTrainsAtTime = (svg, timestamp) => {
-  const currentPositions = getCurrentTrains(timestamp);
-  
+const drawTrainsAtTime = (svg, timestamp, mareyTrips) => {
+  const currentPositions = getCurrentTrains(timestamp, mareyTrips);
   if ('trainDots' in svg) {
     Object.keys(svg.trainDots).forEach((trip) => {
       if (!(trip in currentPositions)) {

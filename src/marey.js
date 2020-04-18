@@ -1,31 +1,24 @@
-import mareyTrips from '../data/marey-trips.json';
-import mareyHeaders from '../data/marey-header.json';
-import stationNetwork from '../data/station-network.json';
+import {mareyHeaders, stationNames} from './data';
 import moment from 'moment';
 import Chartist from 'chartist';
 import MareyTooltip from './marey-tooltip';
 import {StationMap} from './map';
 
-const stationNames = Object.fromEntries(stationNetwork.nodes.map((node) => [node.id, node.name]));
-
-const showMarey = async () => {
+const showMarey = async (mareyTrips) => {
     const mareyMap = StationMap('marey-map');
 
-    mareyTrips.map((trip) => {
-        trip.stops.map((stop) => {
-            stop.y = mareyHeaders[`${stop.stop}|${trip.line}`];
-            stop.time = stop.time * 1000;
-        });
-        trip.begin = trip.begin * 1000;
-        trip.end = trip.end * 1000;
-    });
-
-    const series = mareyTrips.map((trip) => {
-        return {
-            className: trip.line,
-            data: trip.stops.map(stop => ({x: stop.time, y: stop.y}))
-        };
-    });
+    const series = mareyTrips.map((trip) => ({
+        className: trip.line,
+        data: trip.stations.map(stop => {
+            let time;
+            if (stop.departureEst != 0) {
+                time = stop.departureEst;
+            } else {
+                time = stop.arrivalEst;
+            }
+            return {x: time, y: mareyHeaders[`${stop.station.placeID}|${trip.line}`]}
+        })
+    }));
 
     let verticalLabels = {};
     Object.entries(mareyHeaders).forEach(([key, value], index, headers) => {
@@ -61,7 +54,7 @@ const showMarey = async () => {
             right: 40
         },
         plugins: [
-            MareyTooltip(mareyMap)
+            MareyTooltip(mareyMap, mareyTrips)
         ]
     });
 

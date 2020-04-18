@@ -1,15 +1,30 @@
 import showMarey from './marey';
-import showTimetables from './timetables';
+import {showTimetables, updateTimetables} from './timetables';
+import numTrains from './num-trains';
 import {StationMap, drawTrainsAtTime} from './map';
+import {getTrips} from './data';
 import './styles/style.scss';
 
-showMarey();
 const heroMap = StationMap('hero-map');
-
-drawTrainsAtTime(heroMap, 1585262220000);
 
 showTimetables();
 
 document.getElementById('scroll-down').onclick = () => {
   window.scrollTo(0, window.innerHeight - 4 * parseFloat(getComputedStyle(document.documentElement).fontSize));
 }
+
+let drawInterval;
+const reloadTrips = (first) => {
+  getTrips().then((mareyTrips) => {
+    numTrains(mareyTrips);
+    updateTimetables(mareyTrips);
+    clearInterval(drawInterval);
+    drawInterval = setInterval(() => drawTrainsAtTime(heroMap, new Date().getTime(), mareyTrips), 100);
+    if (first) {
+      showMarey(mareyTrips);
+    }
+  });
+}
+
+reloadTrips(true);
+setInterval(reloadTrips, 5000);

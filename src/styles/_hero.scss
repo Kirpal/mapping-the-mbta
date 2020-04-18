@@ -1,5 +1,5 @@
 #hero {
-  height: calc(100vh - 8rem);
+  min-height: calc(100vh - 8rem);
   background: #fff;
   grid-column: 1 / -1;
   text-align: center;

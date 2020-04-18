@@ -8,6 +8,8 @@ namespace MappingTheMBTA
 {
     public class Startup
     {
+        readonly string AccessControlPolicy = "_accessControlPolicy";
+        
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -18,6 +20,14 @@ namespace MappingTheMBTA
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: AccessControlPolicy,
+                                builder =>
+                                {
+                                    builder.WithOrigins("*");
+                                });
+            });
             services.AddControllers();
         }
 
@@ -34,6 +44,8 @@ namespace MappingTheMBTA
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseCors(AccessControlPolicy);
 
             app.UseEndpoints(endpoints =>
             {
