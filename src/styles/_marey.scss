@@ -16,6 +16,16 @@
     width: 45%;
   }
 
+  @media screen and (max-width: $breakpoint) {
+    .row {
+      flex-direction: column;
+
+      #marey-map, #marey-text {
+        width: 100%;
+      }
+    }
+  }
+
   #marey-main {
     position: relative;
     width: 100%;
