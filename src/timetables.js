@@ -1,10 +1,14 @@
-import {stationNetwork, stationNames} from './data';
+import {stationNetwork} from './data';
 
 const createTimetable = (line, {name, id}) => {
   let card = document.createElement('div');
   let lineClass = line.split('-')[0];
   
   card.classList = `card station-timetable ${lineClass}`;
+  if (lineClass == 'green') {
+    card.classList += ` ${line}`;
+  }
+
   card.style.display = lineClass == 'green' ? 'block' : 'none';
   card.innerHTML = `<h3 class="station-header">${name}</h3>
                     <table id="timetable-${lineClass}|${id}"></table>`;
@@ -24,16 +28,15 @@ const formatArrivalTime = (now, arrivalEst) => {
   }
 }
 
-const updateTimetables = (mareyTrips) => {
-  const timetables = mareyTrips.reduce((timetables, {line, stations}) => {
+const getTimetables = (mareyTrips) => {
+  return mareyTrips.reduce((timetables, {line, stations, destination}) => {
     if (stations.length > 0) {
-      let dest = stations[stations.length - 1].station.placeID;
       return stations.reduce((currentTT, {arrivalEst, station}) => {
-        let stationID = `${line.split('-')[0]}|${station.placeID}`;
         let data = {
-          destination: stationNames[dest],
+          destination: destination,
           arrivalEst: arrivalEst
         }
+        let stationID = `${line.split('-')[0]}|${station.placeID}`;
         if (stationID in currentTT) {
           currentTT[stationID].push(data);
         } else {
@@ -45,6 +48,10 @@ const updateTimetables = (mareyTrips) => {
       return timetables;
     }
   }, {});
+}
+
+const updateTimetables = (mareyTrips) => {
+  const timetables = getTimetables(mareyTrips);
   
   Object.entries(timetables).forEach(([stationID, incoming]) => {
     let now = new Date().getTime();
@@ -80,11 +87,19 @@ const showTimetables = () => {
   Array.from(document.getElementsByClassName('line-select')).forEach((checkbox) => {
     checkbox.addEventListener('change', (e) => {
       showLine(e.target.dataset.line);
+
+      if (e.target.dataset.line.includes('green')) {
+        document.getElementById('green-selector').style.display = 'inline-flex';
+      } else {
+        document.getElementById('timetable-green-all').checked = true;
+        document.getElementById('green-selector').style.display = 'none';
+      }
     });
   });
 };
 
 export {
   showTimetables,
-  updateTimetables
+  updateTimetables,
+  getTimetables
 };

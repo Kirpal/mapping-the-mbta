@@ -25,6 +25,8 @@
         <div class="status-data">
             <h2 id="num-trains-orange" class="status-figure"></h2>
             <p class="status-caption">trains in service</p>
+            <h2 id="avg-wait-orange" class="status-figure"></h2>
+            <p class="status-caption">average wait</p>
         </div>
     </div>
     <div class="card line-status green">
@@ -32,6 +34,8 @@
         <div class="status-data">
             <h2 id="num-trains-green" class="status-figure"></h2>
             <p class="status-caption">trains in service</p>
+            <h2 id="avg-wait-green" class="status-figure"></h2>
+            <p class="status-caption">average wait</p>
         </div>
     </div>
     <div class="card line-status blue">
@@ -39,6 +43,8 @@
         <div class="status-data">
             <h2 id="num-trains-blue" class="status-figure"></h2>
             <p class="status-caption">trains in service</p>
+            <h2 id="avg-wait-blue" class="status-figure"></h2>
+            <p class="status-caption">average wait</p>
         </div>
     </div>
     <div class="card line-status red">
@@ -46,6 +52,8 @@
         <div class="status-data">
             <h2 id="num-trains-red" class="status-figure"></h2>
             <p class="status-caption">trains in service</p>
+            <h2 id="avg-wait-red" class="status-figure"></h2>
+            <p class="status-caption">average wait</p>
         </div>
     </div>
 
@@ -65,7 +73,7 @@
         <h2>Station Timetables</h2>
         <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Quia, fugit omnis necessitatibus fugiat consequatur cupiditate delectus consequuntur architecto repellat temporibus animi error distinctio quaerat nostrum. Accusantium consectetur totam natus officia.</p>
 
-        <ul id="line-selector">
+        <ul class="line-selector">
             <li>
                 <input class="line-select" type="radio" name="timetable" id="timetable-green" data-line="green" checked>
                 <label class="green line-select-label" for="timetable-green">Green Line</label>
@@ -84,6 +92,33 @@
             <li>
                 <input class="line-select" type="radio" name="timetable" id="timetable-red" data-line="red">
                 <label class="red line-select-label" for="timetable-red">Red Line</label>
+            </li>
+        </ul>
+        <br />
+        <ul id="green-selector" class="line-selector">
+            <li>
+                <input class="line-select" type="radio" name="timetable-green" id="timetable-green-all" data-line="green" checked>
+                <label class="green line-select-label" for="timetable-green-all">All</label>
+            </li>
+
+            <li>
+                <input class="line-select" type="radio" name="timetable-green" id="timetable-green-b" data-line="green-b">
+                <label class="green line-select-label" for="timetable-green-b">B</label>
+            </li>
+
+            <li>
+                <input class="line-select" type="radio" name="timetable-green" id="timetable-green-c" data-line="green-c">
+                <label class="green line-select-label" for="timetable-green-c">C</label>
+            </li>
+
+            <li>
+                <input class="line-select" type="radio" name="timetable-green" id="timetable-green-d" data-line="green-d">
+                <label class="green line-select-label" for="timetable-green-d">D</label>
+            </li>
+
+            <li>
+                <input class="line-select" type="radio" name="timetable-green" id="timetable-green-e" data-line="green-e">
+                <label class="green line-select-label" for="timetable-green-e">E</label>
             </li>
         </ul>
         <div id="timetable-holder"></div>
