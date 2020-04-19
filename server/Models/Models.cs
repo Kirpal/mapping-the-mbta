@@ -2,6 +2,7 @@ using MappingTheMBTA.Data;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MappingTheMBTA.Models
 {
@@ -32,7 +33,7 @@ namespace MappingTheMBTA.Models
 
         public ulong Arrival { get; set; } // time in unix
         public ulong Departure { get; set; } // time in unix
-        public Boolean OnTime { get; set; } // did this train arrive +- 3 minutes of its scheduled time?
+        public bool OnTime { get; set; } // did this train arrive +- 3 minutes of its scheduled time?
     }
 
     public class Station
@@ -46,23 +47,29 @@ namespace MappingTheMBTA.Models
     {
         public static Dictionary<string, string[]> Routes = new Dictionary<string, string[]>();
 
-        public static void Populate()
+        public static async Task Populate()
         {
             // 0 = light rail
             // 1 = subway
             int[] types = new int[] { 0, 1 };
 
-            foreach(int type in types)
+            foreach (int type in types)
             {
-                string json = MBTAWeb.FetchJSON(MBTAWeb.Endpoint.routes, $"?filter[type]={type}");
+                string json = await MBTAWeb.FetchJSONAsync(MBTAWeb.Endpoint.routes, $"?filter[type]={type}");
                 var data = JsonConvert.DeserializeObject<dynamic>(json).data;
                 foreach (var route in data)
                 {
                     string id = route.id;
-                    string[] dirs = route.attributes.direction_destinations.ToObject<string[]>();
-                    Routes.Add(id, dirs);
+
+                    // ignore Mattapan
+                    if (id != "Mattapan")
+                    {
+                        string[] dirs = route.attributes.direction_destinations.ToObject<string[]>();
+                        Routes.Add(id, dirs);
+                    }
                 }
             }
+            return;
         }
     }
 }

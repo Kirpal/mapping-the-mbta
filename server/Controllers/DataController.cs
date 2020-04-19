@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace MappingTheMBTA.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    //[Route("[controller]")]
     public class DataController : ControllerBase
     {
         private readonly ILogger<DataController> _logger;
@@ -17,16 +17,16 @@ namespace MappingTheMBTA.Controllers
             _logger = logger;
         }
 
-        [HttpGet("live")]
+        [HttpGet("actual")]
         public Dataset GetLiveVehicles()
         {
             return Predictions.GetPredictions();
         }
 
         [HttpGet("scheduled")]
-        public IEnumerable<Trip> GetSchedule()
+        public Dataset GetSchedule()
         {
-            return null;
+            return Scheduled.GetSchedule();
         }
     }
 }

@@ -9,8 +9,8 @@ namespace MappingTheMBTA.Data
 {
     public static class Predictions
     {
-        private static Dataset Trips;
         private static Dictionary<string, string> Places = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(@"stations.json"));
+        private static Dataset Trips = new Dataset();
 
         // gets the next hour of predictions
         public static Dataset GetPredictions()
@@ -72,7 +72,7 @@ namespace MappingTheMBTA.Data
                         {
                             GTFS = GTFS,
                             PlaceID = ResolveGTFS(GTFS)
-                        },
+                        }
                     };
 
                     if (prediction.attributes.arrival_time != null)
