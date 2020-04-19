@@ -7,50 +7,84 @@ const getTimestamp = (timeRange, offset, width) => {
 }
 
 
-const MareyTooltip = (map, mareyTrips) => {
-  return (chart) => {
-    if (chart instanceof Chartist.Line) {
-      chart.on('created', (data) => {
-        const tooltips = document.querySelectorAll('.marey-tooltip, .marey-tooltip-text');
-        for (let index = 0; index < tooltips.length; index += 1) {
-          tooltips.item(index).remove();
-        }
+class MareyTooltip {
+  constructor(map, mareyTrips, containerId) {
+    this.map = map;
+    this.mareyTrips = mareyTrips;
+    this.container = document.getElementById(containerId);
+    this.mouseOver = false;
 
-        const line = document.createElement('div');
-        line.className = 'marey-tooltip';
-        line.style = `top: ${data.chartRect.y2}px; height: ${data.chartRect.height()}px`;
-        chart.container.appendChild(line);
+    const tooltips = document.querySelectorAll('.marey-tooltip, .marey-tooltip-text');
+    for (let index = 0; index < tooltips.length; index += 1) {
+      tooltips.item(index).remove();
+    }
 
-        const timeText = document.createElement('p');
-        timeText.className = 'marey-tooltip-text';
-        timeText.style = `top: ${data.chartRect.y2}px;`;
-        line.after(timeText);
-        const $svg = data.svg.getNode();
+    this.line = document.createElement('div');
+    this.line.className = 'marey-tooltip';
 
-        chart.container.addEventListener('mouseenter', () => {
-          line.style.display = 'block';
-          timeText.style.display = 'block';
-        });
-        chart.container.addEventListener('mouseleave', () => {
-          line.style.display = 'none';
-          timeText.style.display = 'none';
-          drawTrainsAtTime(map, new Date().getTime(), mareyTrips);
-        });
+    this.timeText = document.createElement('p');
+    this.timeText.className = 'marey-tooltip-text';
 
-        $svg.addEventListener('mousemove', ({target, offsetX, offsetY}) => {
-          if (target.tagName != 'SPAN' && offsetY > data.chartRect.y2 && offsetY < data.chartRect.y1) {
-            let lineX = Math.max(offsetX + chart.container.style['padding-left'], data.chartRect.x1);
-            lineX = Math.min(lineX, data.chartRect.x1 + data.chartRect.width());
-            let timestamp = getTimestamp(data.axisX.range, lineX - data.chartRect.x1, data.chartRect.width());
+    this.container.appendChild(this.line);
+    this.line.after(this.timeText);
 
-            line.style.left = lineX + 'px';
-            timeText.style.left = (lineX + 1) + 'px';
-            timeText.innerHTML = moment(timestamp).format('h:mm a');
+    let mouseEnter = () => this.mouseEnter();
+    let mouseLeave = () => this.mouseLeave();
 
-            drawTrainsAtTime(map, timestamp, mareyTrips);
+    this.container.removeEventListener('mouseenter', mouseEnter);
+    this.container.removeEventListener('mouseleave', mouseLeave);
+    
+    this.container.addEventListener('mouseenter', mouseEnter);
+    this.container.addEventListener('mouseleave', mouseLeave);
+  }
+
+  mouseEnter() {
+    this.mouseOver = true;
+  }
+
+  mouseLeave() {
+    this.line.style.display = 'none';
+    this.timeText.style.display = 'none';
+    drawTrainsAtTime(this.map, new Date().getTime(), this.mareyTrips);
+    this.mouseOver = false;
+  }
+
+  updateTrips(mareyTrips) {
+    this.mareyTrips = mareyTrips;
+    console.log(this.mouseOver);
+  }
+
+  tooltip() {
+    return (chart) => {
+      if (chart instanceof Chartist.Line) {
+        chart.on('created', (data) => {
+          if (!this.mouseOver) {
+            this.line.style = `top: ${data.chartRect.y2}px; height: ${data.chartRect.height()}px`;
+  
+            this.timeText.style = `top: ${data.chartRect.y2}px;`;
+            
+            chart.container.scrollLeft = chart.container.scrollWidth;
+            drawTrainsAtTime(this.map, new Date().getTime(), this.mareyTrips);
           }
+          
+          const $svg = data.svg.getNode();
+          $svg.addEventListener('mousemove', ({target, offsetX, offsetY}) => {
+            if (target.tagName != 'SPAN' && offsetY > data.chartRect.y2 && offsetY < data.chartRect.y1) {
+              let lineX = Math.max(offsetX + chart.container.style['padding-left'], data.chartRect.x1);
+              lineX = Math.min(lineX, data.chartRect.x1 + data.chartRect.width());
+              let timestamp = getTimestamp(data.axisX.range, lineX - data.chartRect.x1, data.chartRect.width());
+
+              this.line.style.display = 'block';
+              this.timeText.style.display = 'block';
+              this.line.style.left = lineX + 'px';
+              this.timeText.style.left = (lineX + 1) + 'px';
+              this.timeText.innerHTML = moment(timestamp).format('h:mm a');
+
+              drawTrainsAtTime(this.map, timestamp, this.mareyTrips);
+            }
+          });
         });
-      });
+      }
     }
   }
 }

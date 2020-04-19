@@ -1,6 +1,6 @@
-import showMarey from './marey';
+import {showMarey, updateMarey} from './marey';
 import {showTimetables, updateTimetables} from './timetables';
-import numTrains from './num-trains';
+import { numTrains, avgWait } from './num-trains';
 import {StationMap, drawTrainsAtTime} from './map';
 import {getTrips} from './data';
 import './styles/style.scss';
@@ -14,16 +14,23 @@ document.getElementById('scroll-down').onclick = () => {
 }
 
 let drawInterval;
+let marey;
 const reloadTrips = (first) => {
   getTrips().then((mareyTrips) => {
     numTrains(mareyTrips);
     avgWait(mareyTrips);
     updateTimetables(mareyTrips);
-    clearInterval(drawInterval);
-    drawInterval = setInterval(() => drawTrainsAtTime(heroMap, new Date().getTime(), mareyTrips), 100);
+    
     if (first) {
-      showMarey(mareyTrips);
+      marey = showMarey(mareyTrips);
+    } else {
+      updateMarey(marey, mareyTrips);
     }
+
+    clearInterval(drawInterval);
+    drawInterval = setInterval(() => {
+      drawTrainsAtTime(heroMap, new Date().getTime(), mareyTrips);
+    }, 100);
   });
 }
 
