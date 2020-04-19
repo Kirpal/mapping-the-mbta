@@ -17,16 +17,19 @@ namespace MappingTheMBTA.Controllers
             _logger = logger;
         }
 
+        public string GetLiveVehicles() => "give me a date idiot";
+        public string GetScheduled() => "give me a date idiot";
+
         [HttpGet("actual")]
-        public Dataset GetLiveVehicles()
+        public Dataset GetLiveVehicles(int year, int day)
         {
-            return Predictions.GetPredictions();
+            return Actual.Capture();
         }
 
         [HttpGet("scheduled")]
-        public Dataset GetSchedule()
+        public Dataset GetSchedule(int year, int day)
         {
-            return Scheduled.GetSchedule();
+            return Scheduled.Capture();
         }
     }
 }

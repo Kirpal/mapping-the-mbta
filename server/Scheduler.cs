@@ -1,7 +1,6 @@
 ﻿using FluentScheduler;
 using MappingTheMBTA.Models;
 using MappingTheMBTA.Data;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace MappingTheMBTA
@@ -15,36 +14,36 @@ namespace MappingTheMBTA
             t.Wait();
 
             // Run the data updater now & every 30 seconds
-            Schedule<UpdateData>().ToRunNow().AndEvery(30).Seconds();
+            Schedule<UpdatePredictions>().ToRunNow().AndEvery(30).Seconds();
 
-            // Run the data capturer every minute
-            Schedule<CaptureData>().ToRunEvery(1).Minutes();
+            // Run the data updater now & every 10 seconds
+            Schedule<UpdateActual>().ToRunNow().AndEvery(10).Seconds();
 
-            // Run the schedule capturer now & every day at 4AM
-            Schedule<CaptureSchedule>().ToRunNow().AndEvery(1).Days().At(4, 00);
+            // Run the schedule updater now & every day at 4AM
+            Schedule<UpdateScheduled>().ToRunNow().AndEvery(1).Days().At(4, 00);
         }
 
-        private class UpdateData : IJob
+        private class UpdatePredictions : IJob
         {
             public void Execute()
             {
-                Predictions.UpdateData();
+                Predicted.Update();
             }
         }
 
-        private class CaptureData : IJob
+        private class UpdateActual : IJob
         {
             public void Execute()
             {
-                Actual.CaptureData();
+                Actual.Update();
             }
         }
 
-        private class CaptureSchedule : IJob
+        private class UpdateScheduled : IJob
         {
             public void Execute()
             {
-                Scheduled.CaptureSchedule();
+                Scheduled.Update();
             }
         }
     }

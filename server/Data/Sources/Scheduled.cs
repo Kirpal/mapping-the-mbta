@@ -8,14 +8,15 @@ namespace MappingTheMBTA.Data
 {
     public static class Scheduled
     {
-        public static Dataset Today;
+        public static Dataset _today = new Dataset();
 
-        public static Dataset GetSchedule()
+        // gets today's scheduled trips
+        public static Dataset Capture()
         {
-            return Today;
+            return _today;
         }
 
-        public static void CaptureSchedule()
+        public static void Update()
         {
             Dataset result = new Dataset()
             {
@@ -24,15 +25,15 @@ namespace MappingTheMBTA.Data
             };
 
             List<Trip> trips = new List<Trip>();
-            
+
 
             // foreach route in route -> foreach trip in schedule -> add trip
-            foreach(var route in Route.Routes)
+            foreach (var route in Route.Routes)
             {
                 string jsonRoutes = MBTAWeb.FetchJSON(MBTAWeb.Endpoint.schedules, $"?filter[route]={route.Key}");
-                
+
                 var dataSchedule = JsonConvert.DeserializeObject<dynamic>(jsonRoutes).data;
-                foreach(var schedule in dataSchedule)
+                foreach (var schedule in dataSchedule)
                 {
                     string tripId = schedule.relationships.trip.data.id;
                     if (!trips.Any(x => x.TripID == tripId))
@@ -86,7 +87,7 @@ namespace MappingTheMBTA.Data
             }
 
             result.Trips = trips;
-            Today = result;
+            _today = result;
         }
     }
 }

@@ -6,19 +6,18 @@ using System.Linq;
 
 namespace MappingTheMBTA.Data
 {
-    public static class Predictions
+    public static class Predicted
     {
-        private static Dictionary<string, string> Places = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(@"stations.json"));
-        private static Dataset Trips = new Dataset();
+        private static Dataset _predictions = new Dataset();
 
         // gets the next hour of predictions
-        public static Dataset GetPredictions()
+        public static Dataset Capture()
         {
-            return Trips;
+            return _predictions;
         }
 
         // fetches the most recent data and updates the trip list
-        public static void UpdateData()
+        public static void Update()
         {
             List<Trip> processed = new List<Trip>();
 
@@ -33,7 +32,7 @@ namespace MappingTheMBTA.Data
                 processed.AddRange(ProcessData(jsonPreds, jsonVehicles, route.Value));
             }
 
-            Trips = new Dataset() { Trips = processed };
+            _predictions = new Dataset() { Trips = processed };
         }
 
         // processes raw json into the list format that needs to be returned to the client
