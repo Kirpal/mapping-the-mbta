@@ -2,15 +2,12 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace MappingTheMBTA.Data
 {
     public static class Scheduled
     {
-        private static Dictionary<string, string> Places = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(@"stations.json"));
         public static Dataset Today;
 
         public static Dataset GetSchedule()
@@ -59,14 +56,14 @@ namespace MappingTheMBTA.Data
                         Station = new Station()
                         {
                             GTFS = GTFS,
-                            PlaceID = ResolveGTFS(GTFS)
+                            PlaceID = Utils.ResolveGTFS(GTFS)
                         }
                     };
 
                     if (schedule.attributes.arrival_time != null)
-                        scheduleToAdd.Arrival = ParseTime(schedule.attributes.arrival_time);
+                        scheduleToAdd.Arrival = Utils.ParseTime(schedule.attributes.arrival_time);
                     if (schedule.attributes.departure_time != null)
-                        scheduleToAdd.Departure = ParseTime(schedule.attributes.departure_time);
+                        scheduleToAdd.Departure = Utils.ParseTime(schedule.attributes.departure_time);
 
                     tripToAdd.Stations.Add(scheduleToAdd);
                 }
@@ -90,24 +87,6 @@ namespace MappingTheMBTA.Data
 
             result.Trips = trips;
             Today = result;
-        }
-
-        // Converts the dynamic DateTime format into unix time
-        private static ulong ParseTime(dynamic timestamp)
-        {
-            var time = (DateTime)timestamp;
-
-            return (ulong)time.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
-        }
-
-        // Resolves the api's GTFS location into our place-ID format
-        private static string ResolveGTFS(string GTFS)
-        {
-            string result;
-            if (!Places.TryGetValue(GTFS, out result))
-                return "";
-
-            return result;
         }
     }
 }

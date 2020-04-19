@@ -1,6 +1,5 @@
 ﻿using MappingTheMBTA.Models;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -71,14 +70,14 @@ namespace MappingTheMBTA.Data
                         Station = new Station()
                         {
                             GTFS = GTFS,
-                            PlaceID = ResolveGTFS(GTFS)
+                            PlaceID = Utils.ResolveGTFS(GTFS)
                         }
                     };
 
                     if (prediction.attributes.arrival_time != null)
-                        predToAdd.Arrival = ParseTime(prediction.attributes.arrival_time);
+                        predToAdd.Arrival = Utils.ParseTime(prediction.attributes.arrival_time);
                     if (prediction.attributes.departure_time != null)
-                        predToAdd.Departure = ParseTime(prediction.attributes.departure_time);
+                        predToAdd.Departure = Utils.ParseTime(prediction.attributes.departure_time);
 
                     toAdd.Stations.Add(predToAdd);
                 }
@@ -99,24 +98,6 @@ namespace MappingTheMBTA.Data
                     trip.EndTime = nonzero.Max(x => x);
                 }
             }
-
-            return result;
-        }
-
-        // Converts the dynamic DateTime format into unix time
-        private static ulong ParseTime(dynamic timestamp)
-        {
-            var time = (DateTime)timestamp;
-
-            return (ulong)time.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
-        }
-
-        // Resolves the api's GTFS location into our place-ID format
-        private static string ResolveGTFS(string GTFS)
-        {
-            string result;
-            if (!Places.TryGetValue(GTFS, out result))
-                return "";
 
             return result;
         }
