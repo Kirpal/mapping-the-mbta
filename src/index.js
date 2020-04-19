@@ -17,6 +17,7 @@ let drawInterval;
 const reloadTrips = (first) => {
   getTrips().then((mareyTrips) => {
     numTrains(mareyTrips);
+    avgWait(mareyTrips);
     updateTimetables(mareyTrips);
     clearInterval(drawInterval);
     drawInterval = setInterval(() => drawTrainsAtTime(heroMap, new Date().getTime(), mareyTrips), 100);

@@ -28,8 +28,8 @@ const formatArrivalTime = (now, arrivalEst) => {
   }
 }
 
-const updateTimetables = (mareyTrips) => {
-  const timetables = mareyTrips.reduce((timetables, {line, stations, destination}) => {
+const getTimetables = (mareyTrips) => {
+  return mareyTrips.reduce((timetables, {line, stations, destination}) => {
     if (stations.length > 0) {
       return stations.reduce((currentTT, {arrivalEst, station}) => {
         let data = {
@@ -48,6 +48,10 @@ const updateTimetables = (mareyTrips) => {
       return timetables;
     }
   }, {});
+}
+
+const updateTimetables = (mareyTrips) => {
+  const timetables = getTimetables(mareyTrips);
   
   Object.entries(timetables).forEach(([stationID, incoming]) => {
     let now = new Date().getTime();
@@ -96,5 +100,6 @@ const showTimetables = () => {
 
 export {
   showTimetables,
-  updateTimetables
+  updateTimetables,
+  getTimetables
 };

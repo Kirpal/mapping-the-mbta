@@ -1,3 +1,5 @@
+import { getTimetables } from "./timetables";
+
 const numTrains = (mareyTrips) => {
   const now = new Date().getTime();
   const lines = mareyTrips
@@ -16,4 +18,33 @@ const numTrains = (mareyTrips) => {
   });
 }
 
-export default numTrains;
+const avgWait = (mareyTrips) => {
+  const totalWaits = Object.entries(getTimetables(mareyTrips)).reduce((lineWaits, [stationID, incoming]) => {
+    let line = stationID.split('|')[0];
+    let now = new Date().getTime();
+    let nextIncoming = incoming
+      .filter(({arrivalEst}) => arrivalEst > now)
+      .sort((a, b) => a.arrivalEst - b.arrivalEst);
+
+    if (nextIncoming.length > 0) {
+      let eta = nextIncoming[0].arrivalEst - now;
+      if (line in lineWaits) {
+        lineWaits[line].total += eta;
+        lineWaits[line].count += 1;
+
+      } else {
+        lineWaits[line] = {total: eta, count: 1};
+      }
+    }
+
+    return lineWaits;
+  }, {});
+  Object.entries(totalWaits).forEach(([line, {total, count}]) => {
+    document.getElementById(`avg-wait-${line}`).innerHTML = `${Math.round(total / count / 1000 / 60)} min`;
+  });
+}
+
+export {
+  numTrains,
+  avgWait
+}
