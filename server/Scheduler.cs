@@ -10,6 +10,8 @@ namespace MappingTheMBTA
     {
         public Scheduler()
         {
+            // Populate the routes model
+            Schedule(() => Route.Populate()).ToRunNow();
             // Run the data updater now & every 30 seconds
             Schedule<UpdateFeed>().ToRunNow().AndEvery(30).Seconds();
         }

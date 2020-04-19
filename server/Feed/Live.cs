@@ -9,9 +9,20 @@ namespace MappingTheMBTA.Data
 {
     public static class Live
     {
-        private static string[] Routes = { "Blue", "Red", "Orange", "Green-B", "Green-C", "Green-D", "Green-E" };
-        private static Dictionary<string, string> Places = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(@"stations.json"));
         private static LiveData Trips;
+
+        //private static string[] Routes = { "Blue", "Red", "Orange", "Green-B", "Green-C", "Green-D", "Green-E" };
+        private static Dictionary<string, string> Places = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(@"stations.json"));
+        /*private static Dictionary<string, string[]> Termini = new Dictionary<string, string[]>()
+        {
+            ["Blue"] = new string[] { "Wonderland", "Bowdoin" },
+            ["Red"] = new string[] { "Alewife", "Ashmont" },
+            ["Orange"] = new string[] { "Forest Hills", "Oak Grove" },
+            ["Green-B"] = new string[] { "Lechmere", "Boston College" },
+            ["Green-C"] = new string[] { "Lechmere", "Cleverland Circle" },
+            ["Green-D"] = new string[] { "Lechmere", "Riverside" },
+            ["Green-E"] = new string[] { "Lechmere", "Heath Street" }
+        };*/
 
         // gets the most recently updated data available
         public static LiveData GetUpdated()
@@ -19,33 +30,33 @@ namespace MappingTheMBTA.Data
             return Trips;
         }
 
-        // fetches the most recent data
-        // updates predictions & vehicle lists
+        // fetches the most recent data and updates the trip list
         public static void UpdateData()
         {
             List<Trip> processed = new List<Trip>();
 
-            foreach (string route in Routes)
+            foreach (var route in Route.Routes)
             {
                 string jsonPreds = "";
                 string jsonVehicles = "";
 
-                jsonPreds = MBTA.FetchJSON(MBTA.Endpoint.predictions, "?filter[route]=" + route);
-                jsonVehicles = MBTA.FetchJSON(MBTA.Endpoint.vehicles, "?filter[route]=" + route);
+                jsonPreds = MBTA.FetchJSON(MBTA.Endpoint.predictions, $"?filter[route]={route.Key}");
+                jsonVehicles = MBTA.FetchJSON(MBTA.Endpoint.vehicles, $"?filter[route]={route.Key}");
 
-                processed.AddRange(ProcessData(jsonPreds, jsonVehicles));
+                processed.AddRange(ProcessData(jsonPreds, jsonVehicles, route.Value));
             }
 
             Trips = new LiveData() { Trips = processed };
         }
 
         // processes raw json into the list format that needs to be returned to the client
-        private static List<Trip> ProcessData(string predJson, string vehicleJson)
+        private static List<Trip> ProcessData(string predJson, string vehicleJson, string[] termini)
         {
             List<Trip> result = new List<Trip>();
             var dataPreds = JsonConvert.DeserializeObject<dynamic>(predJson).data;
             var dataVehicles = JsonConvert.DeserializeObject<dynamic>(vehicleJson).data;
 
+            // vehicles
             foreach (var vehicle in dataVehicles)
             {
                 result.Add(new Trip()
@@ -54,9 +65,12 @@ namespace MappingTheMBTA.Data
                     Line = vehicle.relationships.route.data.id,
                     VehicleID = vehicle.id,
                     StartTime = 0,
-                    EndTime = 0
+                    EndTime = 0,
+                    TripID = vehicle.relationships.trip.data.id,
+                    Destination = termini[vehicle.attributes.direction_id]
                 });
             }
+            // predictions (stations)
             foreach (var prediction in dataPreds)
             {
                 string vehicleID = prediction.relationships.vehicle.data.id;
@@ -81,7 +95,7 @@ namespace MappingTheMBTA.Data
                     toAdd.Stations.Add(predToAdd);
                 }
             }
-
+            // start/end times
             foreach (Trip trip in result)
             {
                 List<ulong> times = new List<ulong>();

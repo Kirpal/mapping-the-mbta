@@ -9,7 +9,7 @@ namespace MappingTheMBTA.Data
     public static class MBTA
     {
         // gets new data from the specified endpoint and returns as dynamic object
-        // options allows further specification of the endpoint (filters, etc)
+        // options allows further specification of the endpoint (filters, ids, etc)
         public static string FetchJSON(Endpoint endpoint, string options)
         {
             string baseUrl = "https://api-v3.mbta.com/";
@@ -29,7 +29,8 @@ namespace MappingTheMBTA.Data
         public enum Endpoint
         {
             predictions,
-            vehicles
+            vehicles,
+            routes
         }
     }
 }
