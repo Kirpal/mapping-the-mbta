@@ -12,10 +12,7 @@ const stationNames = Object.fromEntries(stationNetwork.nodes.map((node) => [node
 
 const API_URL = 'https://mbta.kirp.al';
 
-const getTrips = async () => {
-  const trips = (await (await fetch(`${API_URL}/data/live`)).json()).trips;
-  
-  return trips
+const processData = (data) => data
   .filter(({line}) => line != 'Mattapan')
   .map(trip => ({
     line: trip.line.toLowerCase(),
@@ -26,11 +23,17 @@ const getTrips = async () => {
     stations: trip.stations.map((stop) => {
       return {
         station: stop.station,
-        departureEst: stop.departureEst * 1000,
-        arrivalEst: stop.arrivalEst * 1000
+        departure: stop.departure * 1000,
+        arrival: stop.arrival * 1000,
+        onTime: stop.onTime
       }
     })
   }));
+
+const getTrips = async () => {
+  const trips = (await (await fetch(`${API_URL}/actual`)).json()).trips;
+  
+  return processData(trips);
 }
 
 export {

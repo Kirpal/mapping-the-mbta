@@ -23,11 +23,11 @@ const avgWait = (mareyTrips) => {
     let line = stationID.split('|')[0];
     let now = new Date().getTime();
     let nextIncoming = incoming
-      .filter(({arrivalEst}) => arrivalEst > now)
-      .sort((a, b) => a.arrivalEst - b.arrivalEst);
+      .filter(({arrival}) => arrival > now)
+      .sort((a, b) => a.arrival - b.arrival);
 
     if (nextIncoming.length > 0) {
-      let eta = nextIncoming[0].arrivalEst - now;
+      let eta = nextIncoming[0].arrival - now;
       if (line in lineWaits) {
         lineWaits[line].total += eta;
         lineWaits[line].count += 1;

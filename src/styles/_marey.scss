@@ -71,6 +71,10 @@
       &.green-e {
         stroke: $green-line;
       }
+
+      &.scheduled {
+        stroke-opacity: 0.3;
+      }
     }
 
     .ct-line {

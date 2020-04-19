@@ -6,7 +6,7 @@ const getCurrentTrains = (timestamp, mareyTrips) => {
     .filter((trip) => trip.stations.length > 1)
     .filter((trip) => trip.startTime < timestamp && trip.endTime > timestamp)
     .map(({stations, line, vehicleID}) => {
-      let currentStations = stations.filter(({departureEst, arrivalEst}) => departureEst > timestamp && arrivalEst < timestamp && arrivalEst > 0);
+      let currentStations = stations.filter(({departure, arrival}) => departure > timestamp && arrival < timestamp && arrival > 0);
       let to, from;
 
       if (currentStations.length > 0) {
@@ -14,9 +14,9 @@ const getCurrentTrains = (timestamp, mareyTrips) => {
         from = currentStations[0];
       } else {
         from = stations
-        .sort((a, b) => a.departureEst - b.departureEst)
+        .sort((a, b) => a.departure - b.departure)
         .reduce((prev, curr) => {
-          if (curr.departureEst > prev.departureEst && curr.departureEst < timestamp) {
+          if (curr.departure > prev.departure && curr.departure < timestamp) {
             return curr;
           } else {
             return prev;
@@ -24,9 +24,9 @@ const getCurrentTrains = (timestamp, mareyTrips) => {
         });
 
         to = stations
-        .sort((a, b) => a.arrivalEst - b.arrivalEst)
+        .sort((a, b) => a.arrival - b.arrival)
         .reduce((prev, curr) => {
-          if (curr.arrivalEst < prev.arrivalEst && curr.arrivalEst > timestamp) {
+          if (curr.arrival < prev.arrival && curr.arrival > timestamp) {
             return curr;
           } else {
             return prev;
@@ -45,7 +45,7 @@ const getCurrentTrains = (timestamp, mareyTrips) => {
       };
     })
     .map(({to, from, line, vehicleID}) => {
-      let ratio = (timestamp - from.departureEst) / (to.arrivalEst - from.departureEst);
+      let ratio = (timestamp - from.departure) / (to.arrival - from.departure);
       
       let x = from.coord[0];
       let y = from.coord[1];
