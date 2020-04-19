@@ -8,7 +8,7 @@ namespace MappingTheMBTA
 {
     public class Startup
     {
-        readonly string AccessControlPolicy = "_accessControlPolicy";
+        private readonly string AccessControlPolicy = "_accessControlPolicy";
         
         public Startup(IConfiguration configuration)
         {
