@@ -15,9 +15,12 @@ const API_URL = 'https://mbta.kirp.al';
 const getTrips = async () => {
   const trips = (await (await fetch(`${API_URL}/data/live`)).json()).trips;
   
-  return trips.map(trip => ({
+  return trips
+  .filter(({line}) => line != 'Mattapan')
+  .map(trip => ({
     line: trip.line.toLowerCase(),
     vehicleID: trip.vehicleID,
+    destination: trip.destination,
     startTime: trip.startTime * 1000,
     endTime: trip.endTime * 1000,
     stations: trip.stations.map((stop) => {

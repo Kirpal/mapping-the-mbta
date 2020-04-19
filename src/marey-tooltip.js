@@ -11,7 +11,7 @@ const MareyTooltip = (map, mareyTrips) => {
   return (chart) => {
     if (chart instanceof Chartist.Line) {
       chart.on('created', (data) => {
-        const tooltips = document.getElementsByClassName('marey-tooltip marey-tooltip-text');
+        const tooltips = document.querySelectorAll('.marey-tooltip, .marey-tooltip-text');
         for (let index = 0; index < tooltips.length; index += 1) {
           tooltips.item(index).remove();
         }
