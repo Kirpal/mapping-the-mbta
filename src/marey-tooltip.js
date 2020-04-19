@@ -7,11 +7,11 @@ const getTimestamp = (timeRange, offset, width) => {
 }
 
 
-const MareyTooltip = (map) => {
+const MareyTooltip = (map, mareyTrips) => {
   return (chart) => {
     if (chart instanceof Chartist.Line) {
       chart.on('created', (data) => {
-        const tooltips = document.getElementsByClassName('marey-tooltip');
+        const tooltips = document.getElementsByClassName('marey-tooltip marey-tooltip-text');
         for (let index = 0; index < tooltips.length; index += 1) {
           tooltips.item(index).remove();
         }
@@ -22,15 +22,19 @@ const MareyTooltip = (map) => {
         chart.container.appendChild(line);
 
         const timeText = document.createElement('p');
-        line.appendChild(timeText);
+        timeText.className = 'marey-tooltip-text';
+        timeText.style = `top: ${data.chartRect.y2}px;`;
+        line.after(timeText);
         const $svg = data.svg.getNode();
 
         chart.container.addEventListener('mouseenter', () => {
           line.style.display = 'block';
+          timeText.style.display = 'block';
         });
         chart.container.addEventListener('mouseleave', () => {
           line.style.display = 'none';
-          drawTrainsAtTime(map, new Date().getTime());
+          timeText.style.display = 'none';
+          drawTrainsAtTime(map, new Date().getTime(), mareyTrips);
         });
 
         $svg.addEventListener('mousemove', ({target, offsetX, offsetY}) => {
@@ -40,9 +44,10 @@ const MareyTooltip = (map) => {
             let timestamp = getTimestamp(data.axisX.range, lineX - data.chartRect.x1, data.chartRect.width());
 
             line.style.left = lineX + 'px';
+            timeText.style.left = (lineX + 1) + 'px';
             timeText.innerHTML = moment(timestamp).format('h:mm a');
 
-            drawTrainsAtTime(map, timestamp);
+            drawTrainsAtTime(map, timestamp, mareyTrips);
           }
         });
       });

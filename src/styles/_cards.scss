@@ -31,6 +31,10 @@ $card-shadow-opacity: 0.2;
 	background-color: #fff;
 	box-sizing: border-box;
 
+	@media screen and (max-width: $breakpoint) {
+		border-radius: 0;
+	}
+
 	&.green {
 		background-color: $green-line;
 		box-shadow: 0 1rem 1rem -0.4rem rgba($green-line, $card-shadow-opacity);
