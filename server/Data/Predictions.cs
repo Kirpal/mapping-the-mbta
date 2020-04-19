@@ -1,31 +1,19 @@
-﻿using Newtonsoft.Json;
+﻿using MappingTheMBTA.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace MappingTheMBTA.Data
 {
-    public static class Live
+    public static class Predictions
     {
-        private static LiveData Trips;
-
-        //private static string[] Routes = { "Blue", "Red", "Orange", "Green-B", "Green-C", "Green-D", "Green-E" };
+        private static Dataset Trips;
         private static Dictionary<string, string> Places = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(@"stations.json"));
-        /*private static Dictionary<string, string[]> Termini = new Dictionary<string, string[]>()
-        {
-            ["Blue"] = new string[] { "Wonderland", "Bowdoin" },
-            ["Red"] = new string[] { "Alewife", "Ashmont" },
-            ["Orange"] = new string[] { "Forest Hills", "Oak Grove" },
-            ["Green-B"] = new string[] { "Lechmere", "Boston College" },
-            ["Green-C"] = new string[] { "Lechmere", "Cleverland Circle" },
-            ["Green-D"] = new string[] { "Lechmere", "Riverside" },
-            ["Green-E"] = new string[] { "Lechmere", "Heath Street" }
-        };*/
 
-        // gets the most recently updated data available
-        public static LiveData GetUpdated()
+        // gets the next hour of predictions
+        public static Dataset GetPredictions()
         {
             return Trips;
         }
@@ -37,16 +25,16 @@ namespace MappingTheMBTA.Data
 
             foreach (var route in Route.Routes)
             {
-                string jsonPreds = "";
-                string jsonVehicles = "";
+                string jsonPreds;
+                string jsonVehicles;
 
-                jsonPreds = MBTA.FetchJSON(MBTA.Endpoint.predictions, $"?filter[route]={route.Key}");
-                jsonVehicles = MBTA.FetchJSON(MBTA.Endpoint.vehicles, $"?filter[route]={route.Key}");
+                jsonPreds = MBTAWeb.FetchJSON(MBTAWeb.Endpoint.predictions, $"?filter[route]={route.Key}");
+                jsonVehicles = MBTAWeb.FetchJSON(MBTAWeb.Endpoint.vehicles, $"?filter[route]={route.Key}");
 
                 processed.AddRange(ProcessData(jsonPreds, jsonVehicles, route.Value));
             }
 
-            Trips = new LiveData() { Trips = processed };
+            Trips = new Dataset() { Trips = processed };
         }
 
         // processes raw json into the list format that needs to be returned to the client
@@ -61,7 +49,7 @@ namespace MappingTheMBTA.Data
             {
                 result.Add(new Trip()
                 {
-                    Stations = new List<Prediction>(),
+                    Stations = new List<Stop>(),
                     Line = vehicle.relationships.route.data.id,
                     VehicleID = vehicle.id,
                     StartTime = 0,
@@ -78,7 +66,7 @@ namespace MappingTheMBTA.Data
                 {
                     Trip toAdd = result.Single(x => x.VehicleID == vehicleID);
                     string GTFS = prediction.relationships.stop.data.id;
-                    Prediction predToAdd = new Prediction()
+                    Stop predToAdd = new Stop()
                     {
                         Station = new Station()
                         {
@@ -88,9 +76,9 @@ namespace MappingTheMBTA.Data
                     };
 
                     if (prediction.attributes.arrival_time != null)
-                        predToAdd.ArrivalEst = ParseTime(prediction.attributes.arrival_time);
+                        predToAdd.Arrival = ParseTime(prediction.attributes.arrival_time);
                     if (prediction.attributes.departure_time != null)
-                        predToAdd.DepartureEst = ParseTime(prediction.attributes.departure_time);
+                        predToAdd.Departure = ParseTime(prediction.attributes.departure_time);
 
                     toAdd.Stations.Add(predToAdd);
                 }
@@ -99,10 +87,10 @@ namespace MappingTheMBTA.Data
             foreach (Trip trip in result)
             {
                 List<ulong> times = new List<ulong>();
-                foreach (Prediction pred in trip.Stations)
+                foreach (Stop pred in trip.Stations)
                 {
-                    times.Add(pred.ArrivalEst);
-                    times.Add(pred.DepartureEst);
+                    times.Add(pred.Arrival);
+                    times.Add(pred.Departure);
                 }
                 var nonzero = times.Where(x => x != 0);
                 if (nonzero.Count() > 0)

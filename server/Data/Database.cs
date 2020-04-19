@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace MappingTheMBTA.Data
 {
-    public class Historical
+    public class Database
     {
     }
 }

@@ -2,18 +2,18 @@ using MappingTheMBTA.Data;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
-namespace MappingTheMBTA
+namespace MappingTheMBTA.Models
 {
-    public class LiveData
+    public class Dataset
     {
         public List<Trip> Trips { get; set; }
+        public DateTime EffectiveDate { get; set; }
     }
 
     public class Trip
     {
-        public List<Prediction> Stations { get; set; }
+        public List<Stop> Stations { get; set; }
 
         public string Line { get; set; }
 
@@ -26,12 +26,13 @@ namespace MappingTheMBTA
         public string Destination { get; set; }
     }
 
-    public class Prediction
+    public class Stop
     {
         public Station Station { get; set; }
 
-        public ulong ArrivalEst { get; set; } // time in unix
-        public ulong DepartureEst { get; set; } // time in unix
+        public ulong Arrival { get; set; } // time in unix
+        public ulong Departure { get; set; } // time in unix
+        public Boolean OnTime { get; set; } // did this train arrive +- 3 minutes of its scheduled time?
     }
 
     public class Station
@@ -47,13 +48,13 @@ namespace MappingTheMBTA
 
         public static void Populate()
         {
-            // 0 = light rail (GL, Mattapan)
+            // 0 = light rail
             // 1 = subway
             int[] types = new int[] { 0, 1 };
 
             foreach(int type in types)
             {
-                string json = MBTA.FetchJSON(MBTA.Endpoint.routes, $"?filter[type]={type}");
+                string json = MBTAWeb.FetchJSON(MBTAWeb.Endpoint.routes, $"?filter[type]={type}");
                 var data = JsonConvert.DeserializeObject<dynamic>(json).data;
                 foreach (var route in data)
                 {

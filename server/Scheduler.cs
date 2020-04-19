@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentScheduler;
+﻿using FluentScheduler;
+using MappingTheMBTA.Models;
+using MappingTheMBTA.Data;
 
 namespace MappingTheMBTA
 {
@@ -12,17 +10,29 @@ namespace MappingTheMBTA
         {
             // Populate the routes model
             Schedule(() => Route.Populate()).ToRunNow();
-            // Run the data updater now & every 30 seconds
-            Schedule<UpdateFeed>().ToRunNow().AndEvery(30).Seconds();
-        }
-    }
 
-    public class UpdateFeed : IJob
-    {
-        public void Execute()
+            // Run the data updater now & every 30 seconds
+            Schedule<UpdateData>().ToRunNow().AndEvery(30).Seconds();
+
+            // Run the data capturer every minute
+            Schedule<CaptureData>().ToRunEvery(1).Minutes();
+        }
+
+        private class UpdateData : IJob
         {
-            // Run all of the update methods
-            Data.Live.UpdateData();
+            public void Execute()
+            {
+                // Run all of the update methods
+                Predictions.UpdateData();
+            }
+        }
+
+        private class CaptureData : IJob
+        {
+            public void Execute()
+            {
+                Actual.CaptureData();
+            }
         }
     }
 }

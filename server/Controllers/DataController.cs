@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using MappingTheMBTA.Models;
+using MappingTheMBTA.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -19,9 +18,9 @@ namespace MappingTheMBTA.Controllers
         }
 
         [HttpGet("live")]
-        public LiveData GetLiveVehicles()
+        public Dataset GetLiveVehicles()
         {
-            return Data.Live.GetUpdated();
+            return Predictions.GetPredictions();
         }
 
         [HttpGet("scheduled")]
