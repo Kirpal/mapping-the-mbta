@@ -66,6 +66,7 @@ namespace MappingTheMBTA.Data
                     string GTFS = prediction.relationships.stop.data.id;
                     Stop predToAdd = new Stop()
                     {
+                        OnTime = null,
                         Station = new Station()
                         {
                             GTFS = GTFS,

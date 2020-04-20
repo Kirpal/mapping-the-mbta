@@ -33,7 +33,7 @@ namespace MappingTheMBTA.Models
 
         public ulong Arrival { get; set; } // time in unix
         public ulong Departure { get; set; } // time in unix
-        public bool OnTime { get; set; } // did this train arrive +- 3 minutes of its scheduled time?
+        public ulong? OnTime { get; set; } // did this train arrive +- 3 minutes of its scheduled time?
     }
 
     public class Station

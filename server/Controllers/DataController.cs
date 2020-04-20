@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace MappingTheMBTA.Controllers
 {
     [ApiController]
-    //[Route("[controller]")]
+    [Route("api")]
     public class DataController : ControllerBase
     {
         private readonly ILogger<DataController> _logger;
@@ -17,17 +17,18 @@ namespace MappingTheMBTA.Controllers
             _logger = logger;
         }
 
-        public string GetLiveVehicles() => "give me a date idiot";
-        public string GetScheduled() => "give me a date idiot";
+        public Dataset GetLiveVehicles() => GetLiveVehicles(0, 0, 0);
+        public Dataset GetScheduled() => GetSchedule(0, 0, 0);
 
+        // format dates yyyy/mm/dd
         [HttpGet("actual")]
-        public Dataset GetLiveVehicles(int year, int day)
+        public Dataset GetLiveVehicles(int year, int month, int day)
         {
             return Actual.Capture();
         }
 
         [HttpGet("scheduled")]
-        public Dataset GetSchedule(int year, int day)
+        public Dataset GetSchedule(int year, int month, int day)
         {
             return Scheduled.Capture();
         }
