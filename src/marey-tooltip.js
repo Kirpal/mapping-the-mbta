@@ -51,7 +51,6 @@ class MareyTooltip {
 
   updateTrips(mareyTrips) {
     this.mareyTrips = mareyTrips;
-    console.log(this.mouseOver);
   }
 
   tooltip() {

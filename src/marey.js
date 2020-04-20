@@ -5,7 +5,13 @@ import MareyTooltip from './marey-tooltip';
 import {StationMap} from './map';
 
 const endOfDay = () => {
-    return moment(new Date()).endOf('hour').valueOf() + 1;
+    let now = moment(new Date());
+
+    if (now.hours() > 2) {
+        now.add({days: 1});
+    }
+
+    return now.startOf('day').add({hours: 2}).valueOf();
 }
 
 const startOfDay = () => {
@@ -22,29 +28,58 @@ const generateMareyTicks = () => {
     let start = startOfDay();
     let ticks = [];
 
-    for(let t = start; t <= moment(new Date()).endOf('hour'); t += 60 * 60 * 1000) {
+    for(let t = start; t <= endOfDay(); t += 60 * 60 * 1000) {
         ticks.push(t);
     }
 
     return ticks
 }
+const tripToCoord = trip => ({
+    className: trip.line + ' ' + (trip.startTime > new Date().getTime() ? 'scheduled' : ''),
+    data: trip.stations
+    .map(stop => {
+        let time;
+        if (stop.arrival != 0) {
+            time = stop.arrival;
+        } else {
+            time = stop.departure;
+        }
+        return {x: time, y: mareyHeaders[`${stop.station.placeID}|${trip.line}`]}
+    })
+});
 
 const getMareySeries = (mareyTrips) => {
-    return mareyTrips.map((trip) => ({
-        className: trip.line,
-        data: trip.stations
-        .filter(({arrivalEst, departureEst}) => arrivalEst < new Date().getTime()
-            || (arrivalEst == 0 && departureEst < new Date().getTime()))
-        .map(stop => {
-            let time;
-            if (stop.arrivalEst != 0) {
-                time = stop.arrivalEst;
-            } else {
-                time = stop.departureEst;
-            }
-            return {x: time, y: mareyHeaders[`${stop.station.placeID}|${trip.line}`]}
-        })
-    }));
+    let mainGreen = [
+        'place-lech',
+        'place-spmnl',
+        'place-north',
+        'place-haecl',
+        'place-gover',
+        'place-pktrm',
+        'place-boyls',
+        'place-armnl',
+        'place-hymnl',
+    ];
+
+    let doubleCountGreen = [
+        'place-coecl',
+        'place-kencl'
+    ];
+
+    const trips = mareyTrips.map((trip) => tripToCoord(trip));
+
+    mareyTrips
+    .filter((trip) => trip.line.startsWith('green'))
+    .forEach((trip) => {
+        let greenTrip = {
+            line: 'green',
+            stations: trip.stations,
+            startTime: trip.startTime
+        };
+        trips.push(tripToCoord(greenTrip));
+    });
+
+    return trips;
 }
 
 const updateMarey = ({chart, map, tooltip}, mareyTrips) => {

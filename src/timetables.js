@@ -18,8 +18,8 @@ const createTimetable = (line, {name, id}) => {
   }
 }
 
-const formatArrivalTime = (now, arrivalEst) => {
-  const timeDifference = Math.round((arrivalEst - now) / 1000 / 60);
+const formatArrivalTime = (now, arrival) => {
+  const timeDifference = Math.round((arrival - now) / 1000 / 60);
 
   if (timeDifference < 1) {
     return 'Arriving';
@@ -31,10 +31,10 @@ const formatArrivalTime = (now, arrivalEst) => {
 const getTimetables = (mareyTrips) => {
   return mareyTrips.reduce((timetables, {line, stations, destination}) => {
     if (stations.length > 0) {
-      return stations.reduce((currentTT, {arrivalEst, station}) => {
+      return stations.reduce((currentTT, {arrival, station}) => {
         let data = {
           destination: destination,
-          arrivalEst: arrivalEst
+          arrival: arrival
         }
         let stationID = `${line.split('-')[0]}|${station.placeID}`;
         if (stationID in currentTT) {
@@ -56,12 +56,12 @@ const updateTimetables = (mareyTrips) => {
   Object.entries(timetables).forEach(([stationID, incoming]) => {
     let now = new Date().getTime();
     let table = incoming
-    .filter(({arrivalEst}) => arrivalEst > 0 && arrivalEst > now)
-    .sort((a, b) => a.arrivalEst - b.arrivalEst)
+    .filter(({arrival}) => arrival > 0 && arrival > now)
+    .sort((a, b) => a.arrival - b.arrival)
     .slice(0, 5)
-    .map(({destination, arrivalEst}) => `<tr>
+    .map(({destination, arrival}) => `<tr>
       <td>${destination}</td>
-      <td>${formatArrivalTime(now, arrivalEst)}</td>
+      <td>${formatArrivalTime(now, arrival)}</td>
     </tr>`);
     document.getElementById(`timetable-${stationID}`).innerHTML = table.join('');
   });
