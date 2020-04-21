@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MappingTheMBTA.Data
 {
@@ -13,6 +14,7 @@ namespace MappingTheMBTA.Data
         // includes the current predictions in the dataset to return
         public static Dataset Include(Dataset today)
         {
+            var lol = _predictions;
             Dataset result = today.Clone();
 
             //
@@ -25,18 +27,23 @@ namespace MappingTheMBTA.Data
         }
 
         // fetches the most recent data and updates the trip list
-        public static void Update()
+        public static async Task Update()
         {
-            List<Trip> processed = new List<Trip>();
+            List<Trip> result = new List<Trip>();
 
+            List<Tuple<Task<string>, string[]>> pending = new List<Tuple<Task<string>, string[]>>();
+
+            // add each route to queue
             foreach (var route in Route.Routes)
-            {
-                string jsonPreds = new MBTAWeb().FetchJSON(MBTAWeb.Endpoint.predictions, $"?filter[route]={route.Key}");
+                pending.Add(Tuple.Create(new MBTAWeb().FetchJSONAsync(MBTAWeb.Endpoint.predictions, $"?filter[route]={route.Key}"), route.Value));
 
-                processed.AddRange(ProcessData(jsonPreds, route.Value));
-            }
+            // process the queue
+            foreach (var item in pending)
+                result.AddRange(ProcessData(await item.Item1, item.Item2));
 
-            _predictions = new Dataset() { Trips = processed };
+            result.ConfigTimes();
+
+            _predictions = new Dataset() { Trips = result };
         }
 
         // processes raw json into the list format that needs to be returned to the client
@@ -48,9 +55,7 @@ namespace MappingTheMBTA.Data
             foreach (var prediction in dataPreds)
             {
                 string tripID = prediction.relationships.trip.data.id;
-
                 // if the trip doesn't exist yet, add it
-                // if it does, add this prediction to it
                 Trip toAdd = result.SingleOrDefault(x => x.TripID == tripID);
                 if (toAdd == default)
                 {
@@ -67,43 +72,23 @@ namespace MappingTheMBTA.Data
                         DirectionID = prediction.attributes.direction_id,
                         Destination = termini[prediction.attributes.direction_id]
                     };
+                    result.Add(toAdd);
                 }
-                else
+
+                string GTFS = prediction.relationships.stop.data.id;
+                Stop predToAdd = new Stop()
                 {
-                    string GTFS = prediction.relationships.stop.data.id;
-                    Stop predToAdd = new Stop()
+                    Delta = null,
+                    Station = new Station()
                     {
-                        Delta = null,
-                        Station = new Station()
-                        {
-                            GTFS = GTFS,
-                            PlaceID = Utils.ResolveGTFS(GTFS)
-                        }
-                    };
+                        GTFS = GTFS,
+                        PlaceID = Utils.ResolveGTFS(GTFS)
+                    },
+                    Arrival = Utils.ParseTime(prediction.attributes.arrival_time) ?? 0,
+                    Departure = Utils.ParseTime(prediction.attributes.departure_time) ?? 0
+                };
 
-                    if (prediction.attributes.arrival_time != null)
-                        predToAdd.Arrival = Utils.ParseTime(prediction.attributes.arrival_time);
-                    if (prediction.attributes.departure_time != null)
-                        predToAdd.Departure = Utils.ParseTime(prediction.attributes.departure_time);
-
-                    toAdd.Stations.Add(predToAdd);
-                }
-            }
-            // start/end times
-            foreach (Trip trip in result)
-            {
-                List<ulong> times = new List<ulong>();
-                foreach (Stop pred in trip.Stations)
-                {
-                    times.Add(pred.Arrival);
-                    times.Add(pred.Departure);
-                }
-                var nonzero = times.Where(x => x != 0);
-                if (nonzero.Count() > 0)
-                {
-                    trip.StartTime = nonzero.Min(x => x);
-                    trip.EndTime = nonzero.Max(x => x);
-                }
+                toAdd.Stations.Add(predToAdd);
             }
 
             return result;

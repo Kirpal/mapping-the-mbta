@@ -10,8 +10,7 @@ namespace MappingTheMBTA
         public Scheduler()
         {
             // Populate the routes model, freeze thread until it's done
-            Task t = Route.Populate();
-            t.Wait();
+            Route.Populate().Wait();
 
             // Run the data updater now & every 30 seconds
             Schedule<UpdatePredictions>().ToRunNow().AndEvery(30).Seconds();

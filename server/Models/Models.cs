@@ -58,23 +58,31 @@ namespace MappingTheMBTA.Models
             // 1 = subway
             int[] types = new int[] { 0, 1 };
 
-            foreach (int type in types)
-            {
-                string json = await new MBTAWeb().FetchJSONAsync(MBTAWeb.Endpoint.routes, $"?filter[type]={type}");
-                var data = JsonConvert.DeserializeObject<dynamic>(json).data;
-                foreach (var route in data)
-                {
-                    string id = route.id;
+            List<Tuple<Task<string>, int>> pending = new List<Tuple<Task<string>, int>>();
 
-                    // ignore Mattapan
-                    if (id != "Mattapan")
-                    {
-                        string[] dirs = route.attributes.direction_destinations.ToObject<string[]>();
-                        Routes.Add(id, dirs);
-                    }
+            // add each type to queue
+            foreach (int type in types)
+                pending.Add(Tuple.Create(new MBTAWeb().FetchJSONAsync(MBTAWeb.Endpoint.routes, $"?filter[type]={type}"), type));
+
+            // process the queue
+            foreach(var item in pending)
+                ProcessLine(await item.Item1);
+        }
+
+        private static void ProcessLine(string jsonLine)
+        {
+            var data = JsonConvert.DeserializeObject<dynamic>(jsonLine).data;
+            foreach (var route in data)
+            {
+                string id = route.id;
+
+                // ignore Mattapan
+                if (id != "Mattapan")
+                {
+                    string[] dirs = route.attributes.direction_destinations.ToObject<string[]>();
+                    Routes.Add(id, dirs);
                 }
             }
-            return;
         }
     }
 }

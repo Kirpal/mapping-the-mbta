@@ -1,7 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using MappingTheMBTA.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace MappingTheMBTA
 {
@@ -13,7 +15,6 @@ namespace MappingTheMBTA
         public static ulong ParseTime(dynamic timestamp)
         {
             var time = (DateTime)timestamp;
-
             return (ulong)time.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
         }
 
@@ -21,10 +22,30 @@ namespace MappingTheMBTA
         public static string ResolveGTFS(string GTFS)
         {
             string result;
+
             if (!Places.TryGetValue(GTFS, out result))
                 return "";
 
             return result;
+        }
+
+        public static void ConfigTimes(this List<Trip> trips)
+        {
+            foreach (Trip trip in trips)
+            {
+                List<ulong> times = new List<ulong>();
+                foreach (Stop pred in trip.Stations)
+                {
+                    times.Add(pred.Arrival);
+                    times.Add(pred.Departure);
+                }
+                var nonzero = times.Where(x => x != 0);
+                if (nonzero.Count() > 0)
+                {
+                    trip.StartTime = nonzero.Min(x => x);
+                    trip.EndTime = nonzero.Max(x => x);
+                }
+            }
         }
     }
 }
