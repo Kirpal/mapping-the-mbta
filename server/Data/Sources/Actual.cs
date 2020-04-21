@@ -48,11 +48,12 @@ namespace MappingTheMBTA.Data
                             Stop curStop = curTrip.Stops.SingleOrDefault(x => x.Station.GTFS == gtfs);
                             if (curStop != null && curStop.Arrival != 0)
                             {
-                                // complete it only if it has not already been completed (delta is null) and has a scheduled arrival
+                                // complete it only if it has not already been completed (delta is null)
+                                // otherwise, continue completion (update departure time)
                                 if (curStop.Delta == null)
                                     curStop.Complete();
                                 else
-                                    curStop.PersistStopped();
+                                    curStop.ContinueCompletion();
                             }
                         }
                     }

@@ -42,7 +42,7 @@ namespace MappingTheMBTA
 
         // To complete a Stop:
         // 1. Delta = [now - arrival]
-        // 2. Departure time = now + 5 seconds
+        // 2. Departure time = now
         // 3. Arrival time = now
         public static void Complete(this Stop stop)
         {
@@ -54,7 +54,7 @@ namespace MappingTheMBTA
 
         // This stop has already completed, but the vehicle is still there
         // Update the departed field
-        public static void PersistStopped(this Stop stop)
+        public static void ContinueCompletion(this Stop stop)
         {
             if (stop.Departure != 0)
                 stop.Departure = DateTime.Now.ToUnixSeconds();
