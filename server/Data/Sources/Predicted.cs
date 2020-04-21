@@ -9,7 +9,7 @@ namespace MappingTheMBTA.Data
 {
     public static class Predicted
     {
-        private static Dataset _predictions = new Dataset();
+        private static List<Trip> _predictions = new List<Trip>();
 
         // includes the current predictions in the dataset to return
         public static Dataset Include(Dataset today)
@@ -33,7 +33,7 @@ namespace MappingTheMBTA.Data
 
             List<Tuple<Task<string>, string[]>> pending = new List<Tuple<Task<string>, string[]>>();
 
-            // add each route to queue
+            // add each route to the queue
             foreach (var route in Route.Routes)
                 pending.Add(Tuple.Create(new MBTAWeb().FetchJSONAsync(MBTAWeb.Endpoint.predictions, $"?filter[route]={route.Key}"), route.Value));
 
@@ -43,7 +43,7 @@ namespace MappingTheMBTA.Data
 
             result.ConfigTimes();
 
-            _predictions = new Dataset() { Trips = result };
+            _predictions = result;
         }
 
         // processes raw json into the list format that needs to be returned to the client
@@ -83,10 +83,13 @@ namespace MappingTheMBTA.Data
                     {
                         GTFS = GTFS,
                         PlaceID = Utils.ResolveGTFS(GTFS)
-                    },
-                    Arrival = Utils.ParseTime(prediction.attributes.arrival_time) ?? 0,
-                    Departure = Utils.ParseTime(prediction.attributes.departure_time) ?? 0
+                    }
                 };
+
+                if (prediction.attributes.arrival_time != null)
+                    predToAdd.Arrival = Utils.ParseTime(prediction.attributes.arrival_time);
+                if (prediction.attributes.departure_time != null)
+                    predToAdd.Departure = Utils.ParseTime(prediction.attributes.departure_time);
 
                 toAdd.Stations.Add(predToAdd);
             }

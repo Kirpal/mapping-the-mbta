@@ -65,7 +65,7 @@ namespace MappingTheMBTA.Models
                 pending.Add(Tuple.Create(new MBTAWeb().FetchJSONAsync(MBTAWeb.Endpoint.routes, $"?filter[type]={type}"), type));
 
             // process the queue
-            foreach(var item in pending)
+            foreach (var item in pending)
                 ProcessLine(await item.Item1);
         }
 

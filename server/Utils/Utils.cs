@@ -29,6 +29,7 @@ namespace MappingTheMBTA
             return result;
         }
 
+        // enforces that each trip's start/end times are correct
         public static void ConfigTimes(this List<Trip> trips)
         {
             foreach (Trip trip in trips)
