@@ -31,7 +31,7 @@ const processData = (data) => data
   }));
 
 const getTrips = async () => {
-  const trips = (await (await fetch(`${API_URL}/actual`)).json()).trips;
+  const trips = (await (await fetch(`${API_URL}/api/scheduled`)).json()).trips;
   
   return processData(trips);
 }
