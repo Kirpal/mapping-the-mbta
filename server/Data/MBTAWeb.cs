@@ -5,11 +5,11 @@ using MappingTheMBTA.Models;
 
 namespace MappingTheMBTA.Data
 {
-    public static class MBTAWeb
+    public class MBTAWeb
     {
         // gets new data from the specified endpoint and returns as dynamic object
         // options allows further specification of the endpoint (filters, ids, etc)
-        public static string FetchJSON(Endpoint endpoint, string options)
+        public string FetchJSON(Endpoint endpoint, string options)
         {
             string baseUrl = "https://api-v3.mbta.com/";
             string target = baseUrl + endpoint.ToString().ToLower() + options;
@@ -26,7 +26,7 @@ namespace MappingTheMBTA.Data
         }
 
         // the same thing, but async
-        public static async Task<string> FetchJSONAsync(Endpoint endpoint, string options)
+        public async Task<string> FetchJSONAsync(Endpoint endpoint, string options)
         {
             string baseUrl = "https://api-v3.mbta.com/";
             string target = baseUrl + endpoint.ToString().ToLower() + options;

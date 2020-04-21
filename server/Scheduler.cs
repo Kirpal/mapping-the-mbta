@@ -35,7 +35,7 @@ namespace MappingTheMBTA
         {
             public void Execute()
             {
-                Actual.Update();
+                Sources.Actual.Update();
             }
         }
 
@@ -43,7 +43,7 @@ namespace MappingTheMBTA
         {
             public void Execute()
             {
-                Scheduled.Update();
+                Sources.Scheduled.Update();
             }
         }
     }

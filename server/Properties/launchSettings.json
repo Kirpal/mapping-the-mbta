@@ -19,7 +19,6 @@
     },
     "MappingTheMBTA": {
       "commandName": "Project",
-      "launchBrowser": true,
       "launchUrl": "data",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

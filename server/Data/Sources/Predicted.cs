@@ -1,7 +1,7 @@
 ﻿using MappingTheMBTA.Models;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.IO;
+using System;
 using System.Linq;
 
 namespace MappingTheMBTA.Data
@@ -10,10 +10,18 @@ namespace MappingTheMBTA.Data
     {
         private static Dataset _predictions = new Dataset();
 
-        // gets the next hour of predictions
-        public static Dataset Capture()
+        // includes the current predictions in the dataset to return
+        public static Dataset Include(Dataset today)
         {
-            return _predictions;
+            Dataset result = today.Clone();
+
+            //
+            //
+            // insert predictions into result here
+            //
+            //
+
+            return result;
         }
 
         // fetches the most recent data and updates the trip list
@@ -23,50 +31,49 @@ namespace MappingTheMBTA.Data
 
             foreach (var route in Route.Routes)
             {
-                string jsonPreds;
-                string jsonVehicles;
+                string jsonPreds = new MBTAWeb().FetchJSON(MBTAWeb.Endpoint.predictions, $"?filter[route]={route.Key}");
 
-                jsonPreds = MBTAWeb.FetchJSON(MBTAWeb.Endpoint.predictions, $"?filter[route]={route.Key}");
-                jsonVehicles = MBTAWeb.FetchJSON(MBTAWeb.Endpoint.vehicles, $"?filter[route]={route.Key}");
-
-                processed.AddRange(ProcessData(jsonPreds, jsonVehicles, route.Value));
+                processed.AddRange(ProcessData(jsonPreds, route.Value));
             }
 
             _predictions = new Dataset() { Trips = processed };
         }
 
         // processes raw json into the list format that needs to be returned to the client
-        private static List<Trip> ProcessData(string predJson, string vehicleJson, string[] termini)
+        private static List<Trip> ProcessData(string predJson, string[] termini)
         {
             List<Trip> result = new List<Trip>();
             var dataPreds = JsonConvert.DeserializeObject<dynamic>(predJson).data;
-            var dataVehicles = JsonConvert.DeserializeObject<dynamic>(vehicleJson).data;
-
-            // vehicles
-            foreach (var vehicle in dataVehicles)
-            {
-                result.Add(new Trip()
-                {
-                    Stations = new List<Stop>(),
-                    Line = vehicle.relationships.route.data.id,
-                    VehicleID = vehicle.id,
-                    StartTime = 0,
-                    EndTime = 0,
-                    TripID = vehicle.relationships.trip.data.id,
-                    Destination = termini[vehicle.attributes.direction_id]
-                });
-            }
             // predictions (stations)
             foreach (var prediction in dataPreds)
             {
-                string vehicleID = prediction.relationships.vehicle.data.id;
-                if (result.Any(x => x.VehicleID == vehicleID))
+                string tripID = prediction.relationships.trip.data.id;
+
+                // if the trip doesn't exist yet, add it
+                // if it does, add this prediction to it
+                Trip toAdd = result.SingleOrDefault(x => x.TripID == tripID);
+                if (toAdd == default)
                 {
-                    Trip toAdd = result.Single(x => x.VehicleID == vehicleID);
+                    toAdd = new Trip()
+                    {
+                        Stations = new List<Stop>(),
+                        Line = prediction.relationships.route.data.id,
+                        VehicleID = prediction.relationships.vehicle.data.id,
+                        TripID = tripID,
+
+                        StartTime = 0,
+                        EndTime = 0,
+
+                        DirectionID = prediction.attributes.direction_id,
+                        Destination = termini[prediction.attributes.direction_id]
+                    };
+                }
+                else
+                {
                     string GTFS = prediction.relationships.stop.data.id;
                     Stop predToAdd = new Stop()
                     {
-                        OnTime = null,
+                        Delta = null,
                         Station = new Station()
                         {
                             GTFS = GTFS,

@@ -10,6 +10,10 @@ namespace MappingTheMBTA.Models
     {
         public List<Trip> Trips { get; set; }
         public DateTime EffectiveDate { get; set; }
+
+        public Dataset Clone() => (Dataset)MemberwiseClone();
+
+        public void erase() => Trips = new List<Trip>();
     }
 
     public class Trip
@@ -24,6 +28,7 @@ namespace MappingTheMBTA.Models
         public ulong StartTime { get; set; } // time in unix
         public ulong EndTime { get; set; } // time in unix
 
+        public int DirectionID { get; set; } // the direction the trip is facing (inbound / outbound)
         public string Destination { get; set; }
     }
 
@@ -31,9 +36,9 @@ namespace MappingTheMBTA.Models
     {
         public Station Station { get; set; }
 
-        public ulong Arrival { get; set; } // time in unix
-        public ulong Departure { get; set; } // time in unix
-        public ulong? OnTime { get; set; } // did this train arrive +- 3 minutes of its scheduled time?
+        public ulong Arrival { get; set; } // time in unix, scheduled time then arrived time
+        public ulong Departure { get; set; } // time in unix, scheduled time then arrived time
+        public ulong? Delta { get; set; } // [arrived time - scheduled time] filled in after a train arrives
     }
 
     public class Station
@@ -55,7 +60,7 @@ namespace MappingTheMBTA.Models
 
             foreach (int type in types)
             {
-                string json = await MBTAWeb.FetchJSONAsync(MBTAWeb.Endpoint.routes, $"?filter[type]={type}");
+                string json = await new MBTAWeb().FetchJSONAsync(MBTAWeb.Endpoint.routes, $"?filter[type]={type}");
                 var data = JsonConvert.DeserializeObject<dynamic>(json).data;
                 foreach (var route in data)
                 {

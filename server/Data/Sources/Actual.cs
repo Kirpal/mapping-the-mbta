@@ -6,21 +6,20 @@ using System.Threading.Tasks;
 
 namespace MappingTheMBTA.Data
 {
-    public static class Actual
+    public static partial class Sources
     {
-        private static Dataset _actual = new Dataset();
-
-        // gets the observed trips for today
-        public static Dataset Capture()
+        public static class Actual
         {
-            return _actual;
-        }
-
-        // updates the current state of the network based on vehicle statuses
-        // when something is added to _actual, it should also be stored in the database
-        public static void Update()
-        {
-
+            // updates the current state of the network based on vehicle statuses
+            // will modify the Sources.Today dataset
+            public static void Update()
+            {
+                // 1. get vehicle json
+                // 2. search for all trips with a vehicle status "stopped_at"
+                // 3. if that trip hasn't been marked as complete, complete it and record time delta
+                // 4. add the time difference to the departure time
+                
+            }
         }
     }
 }

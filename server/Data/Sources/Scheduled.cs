@@ -3,34 +3,64 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MappingTheMBTA.Data
 {
-    public static class Scheduled
+    public static partial class Sources
     {
-        public static Dataset _today = new Dataset();
-
-        // gets today's scheduled trips
-        public static Dataset Capture()
+        public static class Scheduled
         {
-            return _today;
-        }
-
-        public static void Update()
-        {
-            Dataset result = new Dataset()
+            public static async Task Update()
             {
-                EffectiveDate = DateTime.Today,
-                Trips = new List<Trip>()
-            };
+                Dataset result = new Dataset()
+                {
+                    EffectiveDate = DateTime.Today,
+                    Trips = new List<Trip>()
+                };
 
-            List<Trip> trips = new List<Trip>();
+                List<Trip> trips = new List<Trip>();
 
+                List<Tuple<Task<string>, KeyValuePair<string, string[]>>> pending = new List<Tuple<Task<string>, KeyValuePair<string, string[]>>>();
 
-            // foreach route in route -> foreach trip in schedule -> add trip
-            foreach (var route in Route.Routes)
+                // foreach route in route -> foreach trip in schedule -> add trip
+                foreach (var route in Route.Routes)
+                {
+                    pending.Add(Tuple.Create(new MBTAWeb().FetchJSONAsync(MBTAWeb.Endpoint.schedules, $"?filter[route]={route.Key}"), route));
+                }
+
+                // unpack the pending queue
+                // await each tuple's json -> process it -> store it
+                foreach (Tuple<Task<string>, KeyValuePair<string, string[]>> item in pending)
+                {
+                    string json = await item.Item1;
+                    trips.AddRange(ProcessRoute(json, item.Item2));
+                }
+
+                // add start/end times to each trip
+                foreach (Trip trip in trips)
+                {
+                    List<ulong> times = new List<ulong>();
+                    foreach (Stop pred in trip.Stations)
+                    {
+                        times.Add(pred.Arrival);
+                        times.Add(pred.Departure);
+                    }
+                    var nonzero = times.Where(x => x != 0);
+                    if (nonzero.Count() > 0)
+                    {
+                        trip.StartTime = nonzero.Min(x => x);
+                        trip.EndTime = nonzero.Max(x => x);
+                    }
+                }
+
+                result.Trips = trips;
+                Today = result;
+            }
+
+            private static List<Trip> ProcessRoute(string jsonRoutes, KeyValuePair<string, string[]> route)
             {
-                string jsonRoutes = MBTAWeb.FetchJSON(MBTAWeb.Endpoint.schedules, $"?filter[route]={route.Key}");
+                List<Trip> trips = new List<Trip>();
 
                 var dataSchedule = JsonConvert.DeserializeObject<dynamic>(jsonRoutes).data;
                 foreach (var schedule in dataSchedule)
@@ -68,26 +98,9 @@ namespace MappingTheMBTA.Data
 
                     tripToAdd.Stations.Add(scheduleToAdd);
                 }
-            }
-            // start/end times
-            foreach (Trip trip in trips)
-            {
-                List<ulong> times = new List<ulong>();
-                foreach (Stop pred in trip.Stations)
-                {
-                    times.Add(pred.Arrival);
-                    times.Add(pred.Departure);
-                }
-                var nonzero = times.Where(x => x != 0);
-                if (nonzero.Count() > 0)
-                {
-                    trip.StartTime = nonzero.Min(x => x);
-                    trip.EndTime = nonzero.Max(x => x);
-                }
-            }
 
-            result.Trips = trips;
-            _today = result;
+                return trips;
+            }
         }
     }
 }

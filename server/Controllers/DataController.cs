@@ -17,20 +17,13 @@ namespace MappingTheMBTA.Controllers
             _logger = logger;
         }
 
-        public Dataset GetLiveVehicles() => GetLiveVehicles(0, 0, 0);
-        public Dataset GetScheduled() => GetSchedule(0, 0, 0);
+        public Dataset GetLiveVehicles() => GetActual(0, 0, 0);
 
-        // format dates yyyy/mm/dd
         [HttpGet("actual")]
-        public Dataset GetLiveVehicles(int year, int month, int day)
+        // takes in yyyy, mm, dd
+        public Dataset GetActual(int year, int month, int day)
         {
-            return Actual.Capture();
-        }
-
-        [HttpGet("scheduled")]
-        public Dataset GetSchedule(int year, int month, int day)
-        {
-            return Scheduled.Capture();
+            return Sources.Today;
         }
     }
 }
