@@ -11,15 +11,17 @@ namespace MappingTheMBTA
         {
             // Populate the routes model, freeze thread until it's done
             Route.Populate().Wait();
+            // Populate the schedule for the first time, freeze thread until it's done
+            Sources.Scheduled.Update().Wait();
 
-            // Run the data updater now & every 30 seconds
+            // Run the prediction updater now & every 30 seconds
             Schedule<UpdatePredictions>().ToRunNow().AndEvery(30).Seconds();
 
-            // Run the data updater now & every 10 seconds
-            Schedule<UpdateActual>().ToRunNow().AndEvery(10).Seconds();
+            // Run the data updater now & every 3 seconds
+            Schedule<UpdateActual>().ToRunNow().AndEvery(3).Seconds();
 
-            // Run the schedule updater now & every day at 4AM
-            Schedule<UpdateScheduled>().ToRunNow().AndEvery(1).Days().At(4, 00);
+            // Run the schedule updater every day at 4AM
+            Schedule<UpdateScheduled>().ToRunEvery(1).Days().At(4, 00);
         }
 
         private class UpdatePredictions : IJob

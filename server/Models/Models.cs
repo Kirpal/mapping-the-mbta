@@ -16,15 +16,14 @@ namespace MappingTheMBTA.Models
 
     public class Trip
     {
-        public List<Stop> Stations { get; set; }
+        public List<Stop> Stops { get; set; }
 
         public string Line { get; set; }
 
         public string TripID { get; set; }
-        public string VehicleID { get; set; }
 
-        public ulong StartTime { get; set; } // time in unix
-        public ulong EndTime { get; set; } // time in unix
+        public long StartTime { get; set; } // in unix seconds
+        public long EndTime { get; set; } // in unix seconds
 
         public int DirectionID { get; set; } // the direction the trip is facing (inbound / outbound)
         public string Destination { get; set; }
@@ -34,9 +33,9 @@ namespace MappingTheMBTA.Models
     {
         public Station Station { get; set; }
 
-        public ulong Arrival { get; set; } // time in unix, scheduled time then arrived time
-        public ulong Departure { get; set; } // time in unix, scheduled time then arrived time
-        public ulong? Delta { get; set; } // [arrived time - scheduled time] filled in after a train arrives
+        public long Arrival { get; set; } // time in unix, scheduled time then arrived time
+        public long Departure { get; set; } // time in unix, scheduled time then arrived time
+        public long? Delta { get; set; } // [arrived time - scheduled time] filled in after a train arrives
     }
 
     public class Station

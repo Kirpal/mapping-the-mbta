@@ -14,7 +14,6 @@ namespace MappingTheMBTA.Data
         // includes the current predictions in the dataset to return
         public static Dataset Include(Dataset today)
         {
-            var lol = _predictions;
             Dataset result = today.Clone();
 
             //
@@ -36,7 +35,6 @@ namespace MappingTheMBTA.Data
             // add each route to the queue
             foreach (var route in Route.Routes)
                 pending.Add(Tuple.Create(new MBTAWeb().FetchJSONAsync(MBTAWeb.Endpoint.predictions, $"?filter[route]={route.Key}"), route.Value));
-
             // process the queue
             foreach (var item in pending)
                 result.AddRange(ProcessData(await item.Item1, item.Item2));
@@ -61,9 +59,8 @@ namespace MappingTheMBTA.Data
                 {
                     toAdd = new Trip()
                     {
-                        Stations = new List<Stop>(),
+                        Stops = new List<Stop>(),
                         Line = prediction.relationships.route.data.id,
-                        VehicleID = prediction.relationships.vehicle.data.id,
                         TripID = tripID,
 
                         StartTime = 0,
@@ -91,7 +88,7 @@ namespace MappingTheMBTA.Data
                 if (prediction.attributes.departure_time != null)
                     predToAdd.Departure = Utils.ConvertToSeconds(prediction.attributes.departure_time);
 
-                toAdd.Stations.Add(predToAdd);
+                toAdd.Stops.Add(predToAdd);
             }
 
             return result;

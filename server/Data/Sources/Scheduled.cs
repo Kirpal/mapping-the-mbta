@@ -20,7 +20,6 @@ namespace MappingTheMBTA.Data
                 };
 
                 List<Tuple<Task<string>, KeyValuePair<string, string[]>>> pending = new List<Tuple<Task<string>, KeyValuePair<string, string[]>>>();
-
                 // add each route to the queue
                 foreach (var route in Route.Routes)
                     pending.Add(Tuple.Create(new MBTAWeb().FetchJSONAsync(MBTAWeb.Endpoint.schedules, $"?filter[route]={route.Key}"), route));
@@ -46,10 +45,9 @@ namespace MappingTheMBTA.Data
                     {
                         tripToAdd = new Trip()
                         {
-                            Stations = new List<Stop>(),
+                            Stops = new List<Stop>(),
                             Line = route.Key,
                             TripID = tripID,
-                            VehicleID = tripID, // vehicle ID = trip ID for the purposes of scheduled data
 
                             StartTime = 0,
                             EndTime = 0,
@@ -76,7 +74,7 @@ namespace MappingTheMBTA.Data
                     if (schedule.attributes.departure_time != null)
                         stopToAdd.Departure = Utils.ConvertToSeconds(schedule.attributes.departure_time);
 
-                    tripToAdd.Stations.Add(stopToAdd);
+                    tripToAdd.Stops.Add(stopToAdd);
                 }
 
                 trips.ConfigTimes();
