@@ -8,8 +8,8 @@ namespace MappingTheMBTA.Models
 {
     public class Dataset
     {
-        public List<Trip> Trips { get; set; }
         public int EffectiveDate { get; set; } // in unix days
+        public List<Trip> Trips { get; set; }
 
         public Dataset Clone() => (Dataset)MemberwiseClone();
     }
