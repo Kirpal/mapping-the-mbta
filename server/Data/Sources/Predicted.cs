@@ -87,9 +87,9 @@ namespace MappingTheMBTA.Data
                 };
 
                 if (prediction.attributes.arrival_time != null)
-                    predToAdd.Arrival = Utils.ParseTime(prediction.attributes.arrival_time);
+                    predToAdd.Arrival = Utils.ConvertToSeconds(prediction.attributes.arrival_time);
                 if (prediction.attributes.departure_time != null)
-                    predToAdd.Departure = Utils.ParseTime(prediction.attributes.departure_time);
+                    predToAdd.Departure = Utils.ConvertToSeconds(prediction.attributes.departure_time);
 
                 toAdd.Stations.Add(predToAdd);
             }

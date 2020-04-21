@@ -18,8 +18,7 @@ namespace MappingTheMBTA.Data
                 // 2. search for all trips with a vehicle status "stopped_at"
                 // 3. if that trip hasn't been marked as complete, complete it and record time delta
                 // 4. add the time difference to the departure time
-                if(Today != null)
-                    Predicted.Include(Today);
+                int effective = DateTime.Now.ConvertToEffective();
             }
         }
     }

@@ -9,11 +9,9 @@ namespace MappingTheMBTA.Models
     public class Dataset
     {
         public List<Trip> Trips { get; set; }
-        public DateTime EffectiveDate { get; set; }
+        public int EffectiveDate { get; set; } // in unix days
 
         public Dataset Clone() => (Dataset)MemberwiseClone();
-
-        public void erase() => Trips = new List<Trip>();
     }
 
     public class Trip

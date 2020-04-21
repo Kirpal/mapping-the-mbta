@@ -15,7 +15,7 @@ namespace MappingTheMBTA.Data
             {
                 Dataset result = new Dataset()
                 {
-                    EffectiveDate = DateTime.Today,
+                    EffectiveDate = DateTime.Now.ConvertToEffective(),
                     Trips = new List<Trip>()
                 };
 
@@ -72,9 +72,9 @@ namespace MappingTheMBTA.Data
                     };
 
                     if (schedule.attributes.arrival_time != null)
-                        stopToAdd.Arrival = Utils.ParseTime(schedule.attributes.arrival_time);
+                        stopToAdd.Arrival = Utils.ConvertToSeconds(schedule.attributes.arrival_time);
                     if (schedule.attributes.departure_time != null)
-                        stopToAdd.Departure = Utils.ParseTime(schedule.attributes.departure_time);
+                        stopToAdd.Departure = Utils.ConvertToSeconds(schedule.attributes.departure_time);
 
                     tripToAdd.Stations.Add(stopToAdd);
                 }

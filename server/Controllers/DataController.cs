@@ -11,13 +11,6 @@ namespace MappingTheMBTA.Controllers
     [Route("api")]
     public class DataController : ControllerBase
     {
-        private readonly ILogger<DataController> _logger;
-
-        public DataController(ILogger<DataController> logger)
-        {
-            _logger = logger;
-        }
-
         [HttpGet("actual")]
         // takes in yyyy, mm, dd
         public Dataset GetActual(int year, int month, int day)
