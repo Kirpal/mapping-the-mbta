@@ -4,12 +4,12 @@ import {spider, stationNetwork} from './data';
 // Gets the current train positions based on the given timestamp and trip data
 const getCurrentTrains = (timestamp, mareyTrips) => {
   return Object.fromEntries(mareyTrips
-    .filter((trip) => trip.stations.length > 1) // Filter out trips with 1 or fewer stops
-    .filter((trip) => trip.startTime < timestamp && trip.endTime > timestamp) // Filter out non-current trips
+    .filter(({stations}) => stations.length > 1) // Filter out trips with 1 or fewer stops
+    .filter(({stations}) => stations[0].departure < timestamp && stations[stations.length - 1].arrival > timestamp) // Filter out non-current trips
     .map(({stations, line, id}) => {
       // Filter out any stations the train is not currently at, to see if it is at a single station
       let currentStations = stations
-      .filter(({departure, arrival}) => departure > timestamp && arrival < timestamp && arrival > 0);
+      .filter(({departure, arrival}) => departure > timestamp && (arrival < timestamp && arrival > 0));
       let to, from;
 
       // If at a station return just that station
@@ -17,27 +17,14 @@ const getCurrentTrains = (timestamp, mareyTrips) => {
         to = currentStations[0];
         from = currentStations[0];
       } else {
-        // Find the last station it was at
-        from = stations
-        .sort((a, b) => a.departure - b.departure)
-        .reduce((prev, curr) => {
-          if (curr.departure > prev.departure && curr.departure < timestamp) {
-            return curr;
-          } else {
-            return prev;
-          }
-        });
-
-        // Find the station its headed to
-        to = stations
-        .sort((a, b) => a.arrival - b.arrival)
-        .reduce((prev, curr) => {
-          if (curr.arrival < prev.arrival && curr.arrival > timestamp) {
-            return curr;
-          } else {
-            return prev;
-          }
-        }, stations[stations.length - 1]);
+        // Find the next station it will be at
+        let toIdx = stations.findIndex(({arrival}) => arrival > timestamp);
+        to = stations[toIdx];
+        if (toIdx > 0) {
+          from = stations[toIdx - 1];
+        } else {
+          from = stations[toIdx];
+        }
       }
 
       to.coord = spider[to.placeID];
