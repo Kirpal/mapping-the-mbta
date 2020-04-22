@@ -2,15 +2,22 @@ import Chartist from 'chartist';
 import moment from 'moment';
 import {drawTrainsAtTime} from './map';
 
+// Get the timestamp for a given offset in the time range
 const getTimestamp = (timeRange, offset, width) => {
   return timeRange.min + ((timeRange.max - timeRange.min) * (offset / width));
 }
 
+// Get the scroll offset for a given timestamp
+const getScrollOffset = (timestamp, timeRange, scrollWidth) => {
+  return scrollWidth * (timestamp - timeRange.min) / (timeRange.max - timeRange.min);
+}
 
+// The tooltip that shows on the marey chart
 class MareyTooltip {
-  constructor(map, mareyTrips, containerId) {
+  constructor(map, mareyTrips, containerId, timestamp) {
     this.map = map;
     this.mareyTrips = mareyTrips;
+    this.timestamp = timestamp;
     this.container = document.getElementById(containerId);
     this.mouseOver = false;
 
@@ -45,12 +52,13 @@ class MareyTooltip {
   mouseLeave() {
     this.line.style.display = 'none';
     this.timeText.style.display = 'none';
-    drawTrainsAtTime(this.map, new Date().getTime(), this.mareyTrips);
+    drawTrainsAtTime(this.map, this.timestamp, this.mareyTrips);
     this.mouseOver = false;
   }
 
-  updateTrips(mareyTrips) {
+  updateTrips(mareyTrips, timestamp) {
     this.mareyTrips = mareyTrips;
+    this.timestamp = timestamp;
   }
 
   tooltip() {
@@ -62,8 +70,11 @@ class MareyTooltip {
   
             this.timeText.style = `top: ${data.chartRect.y2}px;`;
             
-            chart.container.scrollLeft = chart.container.scrollWidth;
-            drawTrainsAtTime(this.map, new Date().getTime(), this.mareyTrips);
+            chart.container.scrollLeft = getScrollOffset(
+              this.timestamp,
+              data.axisX.range,
+              chart.container.scrollWidth - chart.container.clientWidth - data.chartRect.x1);
+            drawTrainsAtTime(this.map, this.timestamp, this.mareyTrips);
           }
           
           const $svg = data.svg.getNode();

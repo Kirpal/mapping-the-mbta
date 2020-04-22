@@ -4,8 +4,9 @@ import Chartist from 'chartist';
 import MareyTooltip from './marey-tooltip';
 import {StationMap} from './map';
 
-const endOfDay = () => {
-    let now = moment(new Date());
+// Get the end of the day for the given timestamp
+const endOfDay = (timestamp) => {
+    let now = moment(new Date(timestamp));
 
     if (now.hours() > 2) {
         now.add({days: 1});
@@ -14,8 +15,9 @@ const endOfDay = () => {
     return now.startOf('day').add({hours: 2}).valueOf();
 }
 
-const startOfDay = () => {
-    let now = moment(new Date());
+// Get the beginning of the day for the given timestamp
+const startOfDay = (timestamp) => {
+    let now = moment(new Date(timestamp));
 
     if (now.hours() < 4) {
         now.subtract({days: 1});
@@ -24,18 +26,21 @@ const startOfDay = () => {
     return now.startOf('day').add({hours: 4}).valueOf();
 }
 
-const generateMareyTicks = () => {
-    let start = startOfDay();
+// Generate the ticks every hour for the x-axis
+const generateMareyTicks = (timestamp) => {
+    let start = startOfDay(timestamp);
     let ticks = [];
 
-    for(let t = start; t <= endOfDay(); t += 60 * 60 * 1000) {
+    for(let t = start; t <= endOfDay(timestamp); t += 60 * 60 * 1000) {
         ticks.push(t);
     }
 
     return ticks
 }
-const tripToCoord = trip => ({
-    className: trip.line + ' ' + (trip.startTime > new Date().getTime() ? 'scheduled' : ''),
+
+// Convert a given trip to coordinates on the marey chart
+const tripToCoord = (trip, timestamp) => ({
+    className: trip.line + ' ' + (trip.startTime > timestamp ? 'scheduled' : ''),
     data: trip.stations
     .map(stop => {
         let time;
@@ -44,29 +49,13 @@ const tripToCoord = trip => ({
         } else {
             time = stop.departure;
         }
-        return {x: time, y: mareyHeaders[`${stop.station.placeID}|${trip.line}`]}
+        return {x: time, y: mareyHeaders[`${stop.placeID}|${trip.line}`]}
     })
 });
 
-const getMareySeries = (mareyTrips) => {
-    let mainGreen = [
-        'place-lech',
-        'place-spmnl',
-        'place-north',
-        'place-haecl',
-        'place-gover',
-        'place-pktrm',
-        'place-boyls',
-        'place-armnl',
-        'place-hymnl',
-    ];
-
-    let doubleCountGreen = [
-        'place-coecl',
-        'place-kencl'
-    ];
-
-    const trips = mareyTrips.map((trip) => tripToCoord(trip));
+// Get the series of data for the marey chart based on the trip data
+const getMareySeries = (mareyTrips, timestamp) => {
+    const trips = mareyTrips.map((trip) => tripToCoord(trip, timestamp));
 
     mareyTrips
     .filter((trip) => trip.line.startsWith('green'))
@@ -76,30 +65,32 @@ const getMareySeries = (mareyTrips) => {
             stations: trip.stations,
             startTime: trip.startTime
         };
-        trips.push(tripToCoord(greenTrip));
+        trips.push(tripToCoord(greenTrip, timestamp));
     });
 
     return trips;
 }
 
-const updateMarey = ({chart, map, tooltip}, mareyTrips) => {
-    tooltip.updateTrips(mareyTrips);
+// Update the given marey chart with the given trips and timestamp
+const updateMarey = ({chart, map, tooltip}, mareyTrips, timestamp) => {
+    tooltip.updateTrips(mareyTrips, timestamp);
     chart.update({
-        series: getMareySeries(mareyTrips)
+        series: getMareySeries(mareyTrips, timestamp)
     }, {
         axisX: {
-            low: startOfDay(),
-            high: endOfDay(),
-            ticks: generateMareyTicks(),
+            low: startOfDay(timestamp),
+            high: endOfDay(timestamp),
+            ticks: generateMareyTicks(timestamp),
         },
-        width: `${(endOfDay() - startOfDay()) / 60 / 60 / 1000 * 100}px`
+        width: `${(endOfDay(timestamp) - startOfDay(timestamp)) / 60 / 60 / 1000 * 100}px`
     }, true);
 }
 
-const showMarey = (mareyTrips) => {
+// Show the marey chart with the given trips and timestamp
+const showMarey = (mareyTrips, timestamp) => {
     const mareyMap = StationMap('marey-map');
 
-    const series = getMareySeries(mareyTrips);
+    const series = getMareySeries(mareyTrips, timestamp);
 
     let verticalLabels = {};
     Object.entries(mareyHeaders).forEach(([key, value], index, headers) => {
@@ -112,16 +103,16 @@ const showMarey = (mareyTrips) => {
         }
     });
 
-    const tooltip = new MareyTooltip(mareyMap, mareyTrips, 'marey-main');
+    const tooltip = new MareyTooltip(mareyMap, mareyTrips, 'marey-main', timestamp);
 
     const mareyChart = new Chartist.Line('#marey-main', {
         series: series
     }, {
         axisX: {
             showGrid: false,
-            low: startOfDay(),
-            high: endOfDay(),
-            ticks: generateMareyTicks(),
+            low: startOfDay(timestamp),
+            high: endOfDay(timestamp),
+            ticks: generateMareyTicks(timestamp),
             type: Chartist.FixedScaleAxis,
             labelInterpolationFnc: (val) => moment(new Date(val)).format('h:mm a')
         },
@@ -132,7 +123,7 @@ const showMarey = (mareyTrips) => {
             showGrid: true,
             labelInterpolationFnc: (val) => verticalLabels[val]
         },
-        width: `${(endOfDay() - startOfDay()) / 60 / 60 / 1000 * 100}px`,
+        width: `${(endOfDay(timestamp) - startOfDay(timestamp)) / 60 / 60 / 1000 * 100}px`,
         lineSmooth: false,
         showPoint: false,
         chartPadding: {
