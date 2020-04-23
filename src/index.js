@@ -18,6 +18,13 @@ const currentTimestamp = (date) => {
   return dateTime.valueOf();
 }
 
+// Is the given date today?
+const sameDate = (other) => {
+  let now = new Date();
+
+  return other.getFullYear() == now.getFullYear() && other.getMonth() == now.getMonth() && other.getDate() == now.getDate()
+}
+
 // Load the hero section's map
 const heroMap = StationMap('hero-map');
 
@@ -64,19 +71,19 @@ const reloadTrips = (first) => {
 
 reloadTrips(true);
 
+let reloadTripInterval;
 // Handle the date selector input being changed
 $dateInput.addEventListener('change', (_) => {
   let [y, m, d] = $dateInput.value.split('-');
 
   DATE = new Date(y, m - 1, d);
-  reloadTrips();
-  let now = new Date();
-  if (DATE.getFullYear() == now.getFullYear() && DATE.getMonth() == now.getMonth() && DATE.getDate() == now.getDate()) {
+  if (sameDate(DATE)) {
+    // Reload the trip data on a regular interval
+    clearInterval(reloadTripInterval);
+    reloadTripInterval = setInterval(reloadTrips, 5000);
     document.getElementById('live-indicator').style.opacity = 1;
   } else {
+    reloadTrips();
     document.getElementById('live-indicator').style.opacity = 0;
   }
 });
-
-// Reload the trip data on a regular interval
-setInterval(reloadTrips, 5000);

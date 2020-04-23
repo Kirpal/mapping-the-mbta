@@ -40,11 +40,12 @@ const generateMareyTicks = (timestamp) => {
 
 // Convert a given trip to coordinates on the marey chart
 const tripToCoord = (trip, timestamp) => ({
-    className: trip.line + ' ' + (trip.startTime > timestamp ? 'scheduled' : ''),
+    className: trip.line + ' ' + (trip.startTime > new Date().valueOf() ? 'scheduled' : ''),
     data: trip.stations
+    .filter(({arrival, departure}) => arrival > startOfDay(timestamp) || departure > startOfDay(timestamp))
     .map(stop => {
         let time;
-        if (stop.arrival != 0) {
+        if (stop.arrival > startOfDay(timestamp)) {
             time = stop.arrival;
         } else {
             time = stop.departure;
