@@ -1,0 +1,181 @@
+#date-bar {
+  height: 5rem;
+  width: 100%;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  padding: 0 1rem;
+  background: #fff;
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+
+  p {
+    font: 1rem Lato, sans-serif;
+    padding: 0 1rem;
+
+    &:first-of-type {
+      text-align: right;
+    }
+    
+    &:last-of-type {
+      text-align: left;
+    }
+  }
+
+  input[type="date"] {
+    display:block;
+    position:relative;
+    padding: 0.5rem 2rem 0.5rem 0.5rem;  
+    font-size:1rem;
+    font-family:Lato, sans-serif;
+    
+    border:1px solid #8292a2;
+    border-radius:0.25rem;
+    background:
+      white
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='22' viewBox='0 0 20 22'%3E%3Cg fill='none' fill-rule='evenodd' stroke='%23688EBB' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' transform='translate(1 1)'%3E%3Crect width='18' height='18' y='2' rx='2'/%3E%3Cpath d='M13 0L13 4M5 0L5 4M0 8L18 8'/%3E%3C/g%3E%3C/svg%3E")
+      right 0.5rem
+      center
+      no-repeat;
+    
+    cursor:pointer;
+  }
+  input[type="date"]:focus {
+    outline:none;
+    border-color:#3acfff;
+    box-shadow:0 0 0 0.25rem rgba(0, 120, 250, 0.1);
+  }
+
+  ::-webkit-datetime-edit {}
+  ::-webkit-datetime-edit-fields-wrapper {}
+  ::-webkit-datetime-edit-month-field:hover,
+  ::-webkit-datetime-edit-day-field:hover,
+  ::-webkit-datetime-edit-year-field:hover {
+    background:rgba(0, 120, 250, 0.1);
+  }
+  ::-webkit-datetime-edit-text {
+    opacity:0;
+  }
+  ::-webkit-clear-button,
+  ::-webkit-inner-spin-button {
+    display:none;
+  }
+  ::-webkit-calendar-picker-indicator {
+    position:absolute;
+    width: 1.5rem;
+    height:100%;
+    top:0;
+    right:0;
+    bottom:0;
+    
+    opacity:0;
+    cursor:pointer;
+    
+    color:rgba(0, 120, 250, 1);
+    background:rgba(0, 120, 250, 1);
+  
+  }
+
+  input[type="date"]:hover::-webkit-calendar-picker-indicator { opacity:0.05; }
+  input[type="date"]:hover::-webkit-calendar-picker-indicator:hover { opacity:0.15; }
+
+
+
+
+
+  input[type=range] {
+    box-sizing: border-box;
+    padding-bottom: 0.5rem;
+    height: 1rem;
+    background-color: transparent;
+    cursor: pointer;
+    -webkit-appearance: none;
+    width: 100%;
+  }
+  input[type=range]:disabled {
+    opacity: 0.3;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+  }
+  input[type=range]:focus {
+    outline: none;
+  }
+  input[type=range]::-ms-track {
+    width: 100%;
+    cursor: pointer;
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 2em;
+    height: 2em;
+    margin-top: 0;
+    background-color: #fff;
+    border-radius: 1em;
+    border: 2px solid rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 2em;
+    height: 2em;
+    margin-top: 0;
+    background-color: #fff;
+    border-radius: 1em;
+    border: 2px solid rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+  }
+  input[type=range]::-ms-thumb {
+    width: 2em;
+    height: 2em;
+    margin-top: 0;
+    background-color: #fff;
+    border-radius: 1em;
+    border: 2px solid rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+  }
+  input[type=range]:hover::-webkit-slider-thumb {
+    border-color: rgba(0, 0, 0, 0.5);
+  }
+  input[type=range]:hover::-moz-range-thumb {
+    border-color: rgba(0, 0, 0, 0.5);
+  }
+  input[type=range]:hover::-ms-thumb {
+    border-color: rgba(0, 0, 0, 0.5);
+  }
+  input[type=range]:active::-webkit-slider-thumb {
+    border-color: rgba(0, 0, 0, 0.6);
+  }
+  input[type=range]:active::-moz-range-thumb {
+    border-color: rgba(0, 0, 0, 0.6);
+  }
+  input[type=range]:active::-ms-thumb {
+    border-color: rgba(0, 0, 0, 0.6);
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    cursor: pointer;
+    height: 1em;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.4);
+    background-color: transparent;
+  }
+  input[type=range]::-moz-range-track {
+    width: 100%;
+    cursor: pointer;
+    height: 1em;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.4);
+    background-color: transparent;
+  }
+  input[type=range]::-ms-track {
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+  }
+
+}

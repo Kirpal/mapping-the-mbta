@@ -1,30 +1,8 @@
-import {mareyHeaders, stationNames} from './data';
+import {mareyHeaders, stationNames, endOfDay, startOfDay} from './data';
 import moment from 'moment';
 import Chartist from 'chartist';
 import MareyTooltip from './marey-tooltip';
 import {StationMap} from './map';
-
-// Get the end of the day for the given timestamp
-const endOfDay = (timestamp) => {
-    let now = moment(new Date(timestamp));
-
-    if (now.hours() > 2) {
-        now.add({days: 1});
-    }
-
-    return now.startOf('day').add({hours: 2}).valueOf();
-}
-
-// Get the beginning of the day for the given timestamp
-const startOfDay = (timestamp) => {
-    let now = moment(new Date(timestamp));
-
-    if (now.hours() < 4) {
-        now.subtract({days: 1});
-    }
-
-    return now.startOf('day').add({hours: 4}).valueOf();
-}
 
 // Generate the ticks every hour for the x-axis
 const generateMareyTicks = (timestamp) => {

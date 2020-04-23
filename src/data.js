@@ -37,13 +37,13 @@ const processData = (data) => data
     line: trip.line.toLowerCase(),
     id: trip.tripID,
     destination: trip.destination,
-    startTime: trip.startTime * 1000,
-    endTime: trip.endTime * 1000,
+    startTime: trip.startTime * 1000 + 4 * 60 * 60 * 1000,
+    endTime: trip.endTime * 1000 + 4 * 60 * 60 * 1000,
     stations: trip.stops.map((stop) => {
       return {
         placeID: stop.placeID,
-        departure: stop.departure * 1000,
-        arrival: stop.arrival * 1000,
+        departure: stop.departure * 1000 + 4 * 60 * 60 * 1000,
+        arrival: stop.arrival * 1000 + 4 * 60 * 60 * 1000,
         delta: stop.delta
       }
     })
@@ -63,11 +63,35 @@ const getDates = async () => {
   return dates.sort().map(effectiveToDateString);
 }
 
+// Get the end of the day for the given timestamp
+const endOfDay = (timestamp) => {
+  let now = moment(new Date(timestamp));
+
+  if (now.hours() > 3) {
+      now.add({days: 1});
+  }
+
+  return now.startOf('day').add({hours: 3}).valueOf();
+}
+
+// Get the beginning of the day for the given timestamp
+const startOfDay = (timestamp) => {
+  let now = moment(new Date(timestamp));
+
+  if (now.hours() < 3) {
+      now.subtract({days: 1});
+  }
+
+  return now.startOf('day').add({hours: 3}).valueOf();
+}
+
 export {
   mareyHeaders,
   stationNetwork,
   stationNames,
   spider,
   getTrips,
-  getDates
+  getDates,
+  endOfDay,
+  startOfDay
 };

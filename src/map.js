@@ -1,63 +1,56 @@
 import Chartist from 'chartist';
 import {spider, stationNetwork} from './data';
 
+// Gets the station that the given trip is between
+const getTripStations = (trip, timestamp) => {
+  // Filter out any stations the train is not currently at, to see if it is at a single station
+  let currentStations = trip.stations
+  .filter(({departure, arrival}) => departure > timestamp && (arrival < timestamp && arrival > 0));
+  let to, from;
+
+  // If at a station return just that station
+  if (currentStations.length > 0) {
+    to = currentStations[0];
+    from = currentStations[0];
+  } else {
+    // Find the next station it will be at
+    let toIdx = trip.stations.findIndex(({arrival}) => arrival > timestamp);
+    to = trip.stations[toIdx];
+    if (toIdx > 0) {
+      from = trip.stations[toIdx - 1];
+    } else {
+      from = trip.stations[toIdx];
+    }
+  }
+
+  to.coord = spider[to.placeID];
+  from.coord = spider[from.placeID];
+
+  return Object.assign({}, trip, {to, from});
+}
+
 // Gets the current train positions based on the given timestamp and trip data
 const getCurrentTrains = (timestamp, mareyTrips) => {
-  return Object.fromEntries(mareyTrips
-    .filter(({stations}) => stations.length > 1) // Filter out trips with 1 or fewer stops
-    .filter(({stations}) => stations[0].departure < timestamp && stations[stations.length - 1].arrival > timestamp) // Filter out non-current trips
-    .map(({stations, line, id}) => {
-      // Filter out any stations the train is not currently at, to see if it is at a single station
-      let currentStations = stations
-      .filter(({departure, arrival}) => departure > timestamp && (arrival < timestamp && arrival > 0));
-      let to, from;
-
-      // If at a station return just that station
-      if (currentStations.length > 0) {
-        to = currentStations[0];
-        from = currentStations[0];
-      } else {
-        // Find the next station it will be at
-        let toIdx = stations.findIndex(({arrival}) => arrival > timestamp);
-        to = stations[toIdx];
-        if (toIdx > 0) {
-          from = stations[toIdx - 1];
-        } else {
-          from = stations[toIdx];
-        }
+  return mareyTrips
+  .filter(({stations}) => stations.length > 1) // Filter out trips with 1 or fewer stops
+  .filter(({stations}) => stations[0].departure < timestamp && stations[stations.length - 1].arrival > timestamp) // Filter out non-current trips
+  .map(trip => {
+      if (!('to' in trip) || trip.to.arrival < timestamp) {
+        trip = getTripStations(trip, timestamp);
       }
-
-      to.coord = spider[to.placeID];
-      from.coord = spider[from.placeID];
-
-      return {
-        to,
-        from,
-        line,
-        id
-      };
-    })
-    .map(({to, from, line, id}) => {
       // Find where along the line between the stations the train currently is
-      let ratio = (timestamp - from.departure) / (to.arrival - from.departure);
+      let ratio = (timestamp - trip.from.departure) / (trip.to.arrival - trip.from.departure);
 
       // Translate that relative position to coordinates
-      let x = from.coord[0];
-      let y = from.coord[1];
+      let x = trip.from.coord[0];
+      let y = trip.from.coord[1];
       if ((ratio >= 0 && ratio <= 1)
-        && (from.coord[0] != to.coord[0] || from.coord[1] != to.coord[1])) {
-        x = from.coord[0] + ratio * (to.coord[0] - from.coord[0]);
-        y = from.coord[1] + ratio * (to.coord[1] - from.coord[1]);
+        && (trip.from.coord[0] != trip.to.coord[0] || trip.from.coord[1] != trip.to.coord[1])) {
+        x = trip.from.coord[0] + ratio * (trip.to.coord[0] - trip.from.coord[0]);
+        y = trip.from.coord[1] + ratio * (trip.to.coord[1] - trip.from.coord[1]);
       }
-      return [
-        id,
-        {
-          x: x,
-          y: y,
-          line: line,
-        }
-      ];
-    }));
+      return Object.assign({}, trip, {x, y});
+    });
 }
 
 // Draw trains on the given svg at the given time using the given trip data
@@ -81,10 +74,10 @@ const drawTrainsAtTime = (svg, timestamp, mareyTrips) => {
     });
   } else {
     svg.trainDots = Object.fromEntries(
-      Object.entries(currentPositions)
-      .map(([trip, {x, y}]) => {
+      currentPositions
+      .map(({x, y, id}) => {
         return [
-          trip,
+          id,
           Chartist.Svg('circle',
                 {r: 0.15, cx: x, cy: y},
                 'map-train', svg)
@@ -145,4 +138,4 @@ const StationMap = (elementId) => {
   return svg;
 }
 
-export { StationMap, drawTrainsAtTime };
+export { StationMap, drawTrainsAtTime, getCurrentTrains };

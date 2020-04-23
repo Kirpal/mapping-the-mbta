@@ -8,9 +8,6 @@
 <body>
     <div class="card" id="hero">
         <div id="hero-leading">
-            <div id="date-selector">
-                <input type="date" id="date-selector-input">
-            </div>
             <div id="live-indicator">LIVE</div>
         </div>
         <div id="hero-main">
@@ -129,6 +126,15 @@
         <div id="timetable-holder"></div>
     </div>
     
+    <div id="date-bar">
+        <div id="date-selector">
+            <input type="date" id="date-selector-input">
+        </div>
+        <p id="start-day-label"></p>
+        <input type="range" id="time-selector-input">
+        <p id="end-day-label"></p>
+    </div>
+
     <script src="bundle.js"></script>
 </body>
 </html>
