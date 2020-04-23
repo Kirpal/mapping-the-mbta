@@ -1,6 +1,16 @@
 import Chartist from 'chartist';
 import {spider, stationNetwork} from './data';
 
+const prevStops = Object.assign(
+  ...stationNetwork.links.map((link) => Object.fromEntries([[
+    link.line + '|' + stationNetwork.nodes[link.target].id,
+    stationNetwork.nodes[link.source].id
+  ],[
+    link.line + '|' + stationNetwork.nodes[link.source].id,
+    stationNetwork.nodes[link.target].id
+  ]]))
+);
+
 // Gets the station that the given trip is between
 const getTripStations = (trip, timestamp) => {
   // Filter out any stations the train is not currently at, to see if it is at a single station
@@ -21,6 +31,8 @@ const getTripStations = (trip, timestamp) => {
     } else {
       from = trip.stations[toIdx];
     }
+    from.placeID = prevStops[trip.line + '|' + to.placeID];
+    if (from.placeID == undefined) from.placeID = prevStops[trip.line.split('-')[0] + '|' + to.placeID];
   }
 
   to.coord = spider[to.placeID];

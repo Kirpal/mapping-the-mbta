@@ -21,6 +21,9 @@ const tripToCoord = (trip, timestamp) => ({
     className: trip.line + ' ' + (trip.startTime > new Date().valueOf() ? 'scheduled' : ''),
     data: trip.stations
     .filter(({arrival, departure}) => arrival > startOfDay(timestamp) || departure > startOfDay(timestamp))
+    .filter(({arrival}, idx, arr) => 
+        (idx == 0 && arr[idx + 1].arrival < arrival)
+        || (idx > 0 &&arr[idx - 1].departure < arrival))
     .map(stop => {
         let time;
         if (stop.arrival > startOfDay(timestamp)) {

@@ -42,11 +42,13 @@ const processData = (data) => data
     stations: trip.stops.map((stop) => {
       return {
         placeID: stop.placeID,
-        departure: stop.departure * 1000 + 4 * 60 * 60 * 1000,
-        arrival: stop.arrival * 1000 + 4 * 60 * 60 * 1000,
+        departure: stop.departure != 0 ? stop.departure * 1000 + 4 * 60 * 60 * 1000 : 0,
+        arrival: stop.arrival != 0 ? stop.arrival * 1000 + 4 * 60 * 60 * 1000 : 0,
         delta: stop.delta
       }
     })
+    .filter(({delta, arrival, departure}) => delta != null
+    || arrival > new Date().valueOf() || arrival == 0 || departure == 0)
   }));
 
 // Get the trips for the given date from the api
@@ -60,7 +62,7 @@ const getTrips = async (date = new Date()) => {
 const getDates = async () => {
   const dates = await (await fetch(`${API_URL}/api/dates`)).json();
 
-  return dates.sort().map(effectiveToDateString);
+  return dates.sort().filter(effective => effective != 18374).map(effectiveToDateString);
 }
 
 // Get the end of the day for the given timestamp

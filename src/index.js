@@ -78,6 +78,15 @@ const drawTrips = (mareyTrips, first) => {
 // Reload all displays by fetching updated trips
 const reloadTrips = (first, deltaTime = 100) => {
   getTrips(DATE).then((mareyTrips) => {
+    if (!first) {
+      mareyTrips = MAREY_TRIPS
+      .filter(t => t.delta != null)
+      .concat(mareyTrips
+        .filter(trip => {
+          let other = MAREY_TRIPS.find(t=>t.id==trip.id);
+          return other == undefined || other.delta == null;
+        }));
+    }
     MAREY_TRIPS = mareyTrips;
     drawTrips(mareyTrips, first);
 
