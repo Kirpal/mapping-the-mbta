@@ -44,7 +44,30 @@ const avgWait = (mareyTrips, timestamp) => {
   });
 }
 
+// Update the 'reliability' widget based on the given list of trips and timestamp
+const reliability = (mareyTrips, timestamp) => {
+  let pastHour = timestamp - 60 * 60 * 1000;
+  let goodDelta = 3 * 60;
+  const lines = mareyTrips
+  .filter(({startTime, endTime}) => startTime > pastHour && endTime < timestamp)
+  .reduce((lines, {line, stations}) => {
+    const lineClass = line.split('-')[0];
+    if (!(lineClass in lines)) {
+      lines[lineClass] = [];
+    }
+
+    stations.forEach(stop => {
+      if (stop.delta != null) lines[lineClass].push(stop.delta);
+    });
+    return lines;
+  }, {});
+  Object.entries(lines).forEach(([line, deltas]) => {
+    document.getElementById(`reliability-${line}`).innerHTML = Math.round(100 * (deltas.filter(d => Math.abs(d) < goodDelta).length / deltas.length)) + '%';
+  });
+}
+
 export {
   numTrains,
-  avgWait
+  avgWait,
+  reliability
 }

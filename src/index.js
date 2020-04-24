@@ -1,6 +1,6 @@
 import {showMarey, updateMarey} from './marey';
 import {showTimetables, updateTimetables} from './timetables';
-import { numTrains, avgWait } from './num-trains';
+import { numTrains, avgWait, reliability } from './num-trains';
 import {StationMap, drawTrainsAtTime, getCurrentTrains} from './map';
 import {getTrips, getDates, startOfDay, endOfDay} from './data';
 import './styles/style.scss';
@@ -65,6 +65,7 @@ const drawTrips = (mareyTrips, first) => {
 
   numTrains(mareyTrips, timestamp);
   avgWait(mareyTrips, timestamp);
+  reliability(mareyTrips, timestamp);
   updateTimetables(mareyTrips, timestamp);
   
   if (first) {
